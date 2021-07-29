@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kings Chippy & Chinese</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="./main.css">
+</head>
+<body>
+    <nav class="nav" id="nav">
+        <img class="logo" id="nav-logo" src="./images/logo.png" alt="Kings Chippy Logo">
+        <div class="hamburger-container" id="hamburger">
+            <div class="hamburger-line" id="hl-1"></div>
+            <div class="hamburger-line" id="hl-2"></div>
+            <div class="hamburger-line" id="hl-3"></div>
+        </div>
+        <div class="nav-items-container" id="nav-items">
+        <ul class="nav-items">
+            <a href="#About" class="nav-links"><li>About</li></a>
+            <a href="#Menu" class="nav-links"><li>Menu</li></a>
+            <a href="#Location" class="nav-links"><li>Location</li></a>
+            <a href="#Contact" class="nav-links"><li>Contact</li></a>
+        </ul>
+    </div>
+    </nav>
+    <section class="open" id="open">
+        <p class="open-text">Chinese Fish & Chips</p>
+        <div class="open-img"></div>
+        <a href="#About">
+        <div class="open-arrow" id="open-arrow">&#129147;</div>
+        </a>
+    </section>
+    <section class="about" id="about">
+        <h1 class="section-header">Welcome</h1>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum saepe a, soluta nobis praesentium illum ut sunt mollitia incidunt, itaque provident culpa accusantium facilis inventore.</p>
+    </section>
+    <section class="about-sub" id="about-sub">
+        <h1>For people who like chinese food</h1>
+    </section>
+    <section class="about-img" id="about-img">
+        <div class="pic-1" ></div>
+        <div class="pic-2" ></div>
+    </section>
+    <section class="menu" id="menu">
+        <h1 class="section-header">menu</h1>
+        <div class="container menu-container" id="menu-container">
+        <div class="menu-col">
+            <% menu.forEach((item, index) => { %>
+                <% if(index % 2 === 0) { %>
+                    <div class="menu-item" order-by="<%= index %>">
+                    <h1><%= item.title %></h1>
+                    <% item.items.forEach((col, index) => { %>
+                        <div class="price-title">
+                        <div class="title"><%= col.title %></div>
+                        <div class="price"><%= col.price %></div>
+                        </div>
+                        <% if(col.subDesc){ %>
+                            <% col.subDesc.forEach(sub => { %>
+                                <div class="sub-desc"><%= sub %></div>
+                            <% }) %>
+                        <% } %>
+                        <div class="desc"><%= col.desc %></div>
+                    <% }) %>
+                    </div>
+                    <% } %>
+           <% }) %>
+        </div>
+        <div class="menu-col">
+            <% menu.forEach((item, index) => { %>
+                <% if(index % 2 !== 0) { %>
+                    <div class="menu-item" order-by="<%= index %>">
+                    <h1><%= item.title %></h1>
+                    <% item.items.forEach((col, index) => { %>
+                        <div class="price-title">
+                            <div class="title"><%= col.title %></div>
+                            <div class="price"><%= col.price %></div>
+                            </div>
+                            <% if(col.subDesc){ %>
+                                <% col.subDesc.forEach(sub => { %>
+                                    <div class="sub-desc"><%= sub %></div>
+                                <% }) %>
+                            <% } %>
+                            <div class="desc"><%= col.desc %></div>
+                    <% }) %>
+                    </div>
+                    <% } %>
+           <% }) %>
+        </div>
+        </div>
+    </section>
+    <section class="location" id="location">
+        <h1 class="section-header">location</h1>
+        <div class="container">
+            <div class="map-container" >
+                <div class="map" id="map"></div>
+                <div class="loader" id="loader"></div>
+            </div>
+        </div>
+    </section>
+    <section class="contact" id="contact">
+        <h1 class="section-header">contact</h1>
+        <div class="container contact-container">
+            <div class="contact-col">
+                <h1>visit us</h1>
+                <img class="house-icon" src="./images/house.png" alt="King Chippy House Icon">
+                <p>15 Station Road</p>
+                <p>Touchwood Solihull</p>
+                <p>B91 3TG</p>
+                <a href="tel:+441215723229" class="phone-link">
+                <p class="phone">
+                    Tel: 121-572-3229
+                </p>
+                <div class="underline"></div>
+                </a>
+            </div>
+            <div class="contact-col second-col">
+                <h1>opening</h1>
+                <div class="break"></div>
+                <p><strong>Monday - Thursday</strong></p>
+                <p>11:30am - 12am</p>
+                <div class="break"></div>
+                <p><strong>Friday - Saturday</strong></p>
+                <p>11:30am - 2am</p>
+                <div class="break"></div>
+                <p><strong>Sunday</strong></p>
+                <p>4pm - 12am</p>
+            </div>
+        </div>
+    </section>
+    <section class="footer" id="footer">
+        <p>Made with <span class="heart">&#9829;</span> by Qixotl</p>
+    </section>
+    <!--SCRIPTS-->
+    <script src="./app.bundle.js"></script>
+</body>
+</html>

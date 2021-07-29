@@ -1,0 +1,26 @@
+@keyframes openArrow{
+    0%{
+        bottom: 0px;
+    }
+    50%{
+        bottom: 10px;
+    }
+    100%{
+        bottom: 0px;
+    }
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes heart{
+    0%{
+        transform: scale(1);
+    }
+    50%{
+        transform: scale(1.2);
+    }
+    100%{
+        transform: scale(1);
+    }
+}
