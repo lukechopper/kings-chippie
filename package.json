@@ -17,7 +17,8 @@
     "express": "^4.17.1",
     "gsap": "^3.7.1",
     "mapbox-gl": "^2.3.1",
-    "mongoose": "^5.13.4"
+    "mongoose": "^5.13.4",
+    "stripe": "^8.167.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
@@ -25,6 +26,7 @@
     "autoprefixer": "^10.3.1",
     "babel-loader": "^8.2.2",
     "css-loader": "^6.2.0",
+    "dotenv": "^10.0.0",
     "mini-css-extract-plugin": "^2.1.0",
     "node-sass": "^6.0.1",
     "postcss-loader": "^6.1.1",

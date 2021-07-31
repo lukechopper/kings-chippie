@@ -1,9 +1,7 @@
 import '../styles/style.scss';
-import {addAndRemoveClasses} from './utils.js';
+import {addAndRemoveClasses, trashSVG} from './utils.js';
 import {gsap} from 'gsap';
 import * as map from './map';
-
-const loadURLHash = window.location.hash;
 
 const nav = document.getElementById('nav');
 const navLogo = document.getElementById('nav-logo');
@@ -61,8 +59,6 @@ hamburger.onclick = () => {
     gsap.to(hl3, {duration: 0.5, ease: 'easeInOut', top: '0', rotate: '0'});
 }
 
-if(loadURLHash === '#Home') openSection.scrollIntoView({behavior: 'smooth'});
-
 const aboutSection = document.getElementById('about');
 let navLinks = document.querySelectorAll('.nav-links');
 navLinks = Array.prototype.slice.call(navLinks);
@@ -73,7 +69,6 @@ openArrow.onclick = () => {
 navLinks[0].onclick = () => {
     aboutSection.scrollIntoView({behavior: 'smooth'});
 }
-if(loadURLHash === '#About') aboutSection.scrollIntoView({behavior: 'smooth'});
 
 const menuSection = document.getElementById('menu');
 function addMenuItemEventListener(){
@@ -86,7 +81,7 @@ function addMenuItemEventListener(){
             let scale = 1.04;
             if(height >= 1000 && height < 2000) scale = 1.03;
             if(height >= 2000 && height < 3000) scale = 1.02;
-            if(height >= 3000 && height < 4000) scale = 1.01;
+            if(height >= 3000) scale = 1.01;
             item.style.transform = `scale(${scale})`;
         }
         item.onmouseleave  = () => {
@@ -101,23 +96,17 @@ navLinks[1].onclick = () => {
     menuSection.scrollIntoView({behavior: 'smooth'});
 }
 
-if(loadURLHash === '#Menu') menuSection.scrollIntoView({behavior: 'smooth'});
-
 const locationSection = document.getElementById('location');
 
 navLinks[2].onclick = () => {
     locationSection.scrollIntoView({behavior: 'smooth'});
 }
 
-if(loadURLHash === '#Location') locationSection.scrollIntoView({behavior: 'smooth'});
-
 const contactSection = document.getElementById('contact');
 
 navLinks[3].onclick = () => {
     contactSection.scrollIntoView({behavior: 'smooth'});
 }
-
-if(loadURLHash === '#Contact') contactSection.scrollIntoView({behavior: 'smooth'});
 
 let scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
@@ -161,6 +150,8 @@ let menuCols = document.querySelectorAll('.menu-col');
 let menuCol1Content = menuCols[0].innerHTML;
 let menuCol2Content = menuCols[1].innerHTML;
 const menuContainer = document.getElementById('menu-container');
+const menuTotal = document.getElementById('total');
+const menuTotalPrice = document.getElementById('total-price');
 
 function smallMenu(){
     let menuItems = document.querySelectorAll('.menu-item');
@@ -177,6 +168,8 @@ function smallMenu(){
 if(innerWidth < 780){
     smallMenu();
 }
+let priceContainer = menuContainer.querySelectorAll('.price-title');
+let counterContainer = menuContainer.querySelectorAll('.counter-container');
 
 addEventListener('resize', () => {
     //Animate nav-bar. Related to CSS media queries. Counter 'sortNavHeight' function.
@@ -206,6 +199,7 @@ addEventListener('resize', () => {
         gsap.to(hl3, {duration: 0,  top: '0', rotate: '0'});
     }
     if(innerWidth >= 780 && document.querySelectorAll('.menu-col').length < 1){
+        populateOrderNum(counterContainer);
         let col1 = document.createElement('div');
         col1.classList.add('menu-col');
         let col2 = document.createElement('div');
@@ -216,5 +210,159 @@ addEventListener('resize', () => {
         menuContainer.prepend(col2);
         menuContainer.prepend(col1);
         addMenuItemEventListener();
+        //MENU FUNC
+        menuFunc();
     }
 });
+
+let menuScores = [];
+let orderNum = [];
+const orderContainer = document.getElementById('order-container');
+let totalPrice = 0;
+
+function populateOrderNum(){
+    orderNum = [];
+    counterContainer.forEach((item, index) => {
+        const number = Number(item.querySelector('.number').innerHTML);
+        orderNum.push(number);
+    });
+}
+
+function menuFunc(){
+
+    menuScores = [];
+
+    priceContainer = menuContainer.querySelectorAll('.price-title');
+    counterContainer = menuContainer.querySelectorAll('.counter-container');
+
+    priceContainer.forEach((item, index) => {
+        let price = item.querySelector('.price').innerHTML;
+        const title = item.querySelector('.title').innerHTML;
+        price = price.match(/[\d|\.]/g);
+        price = Number(price.join(''));
+        const total = orderNum[index];
+        const menuItem = {index, title, price, total};
+        menuScores.push(menuItem);
+    });
+    
+    counterContainer.forEach((item, index) => {
+        const plusEle = item.querySelector('.plus');
+        const minusEle = item.querySelector('.minus');
+        const numberEle = item.querySelector('.number');
+        plusEle.onclick = () => {
+            let menuItem = menuScores[index];
+            ++menuItem.total;
+            numberEle.innerHTML = menuItem.total;
+            //MENU PRICE
+            totalPrice += menuItem.price;
+            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
+            //ORDER CONTAINER
+            const orderContainerRows = orderContainer.querySelectorAll('.row');
+
+            let foundTitleMatch = false;
+            let outerIndex = index;
+            let indexOfMatch = 0;
+            orderContainerRows.forEach((row, index) => {
+                if(row.getAttribute('menu-index') == outerIndex){
+                    foundTitleMatch = true;
+                    indexOfMatch = index;
+                }
+            });
+            if(!foundTitleMatch){
+                menuTotal.insertAdjacentHTML('beforebegin', `<div class="row" menu-index="${index}"><p class="row-title"><span class="title-span">${menuItem.title}</span>${trashSVG}</p>
+                    <p class="row-total"><span class="minus">—</span><span class="span-total">${menuItem.total}</span><span class="plus">+</span></p><p class="row-price">£${menuItem.price.toFixed(2)}</p></div>`);
+                    orderContainer.querySelectorAll('.delete-icon').forEach(icon => {
+                        icon.onclick = () => {
+                            let menuIndex = Number(icon.parentNode.parentNode.getAttribute('menu-index'));
+                            icon.parentNode.parentNode.remove();
+                            let menuItem = menuScores[menuIndex];
+                            let menuElement = counterContainer[menuIndex];
+                            totalPrice -= (menuItem.total * menuItem.price);
+                            menuItem.total = 0;
+                            menuElement.querySelector('.number').innerHTML = menuItem.total;
+                            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
+                        };
+                    });
+                    orderContainer.querySelectorAll('.minus').forEach(minus => {
+                        minus.onclick = () => {
+                            let menuIndex = Number(minus.parentNode.parentNode.getAttribute('menu-index'));
+                            let menuItem = menuScores[menuIndex];
+                            let menuElement = counterContainer[menuIndex];
+                            --menuItem.total;
+                            if(menuItem.total < 1){
+                                minus.parentNode.parentNode.remove();
+                            }
+                            menuElement.querySelector('.number').innerHTML = menuItem.total;
+                            totalPrice -= menuItem.price;
+                            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
+                            const spanTotal = minus.parentNode.querySelector('.span-total');
+                            spanTotal.innerHTML = menuItem.total;
+                            const rowPrice = minus.parentNode.parentNode.querySelector('.row-price');
+                            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
+                        };
+                    });
+                    orderContainer.querySelectorAll('.plus').forEach(plus => {
+                        plus.onclick = () => {
+                            let menuIndex = Number(plus.parentNode.parentNode.getAttribute('menu-index'));
+                            let menuItem = menuScores[menuIndex];
+                            let menuElement = counterContainer[menuIndex];
+                            ++menuItem.total;
+                            menuElement.querySelector('.number').innerHTML = menuItem.total;
+                            totalPrice += menuItem.price;
+                            menuTotalPrice.innerHTML = '£'+totalPrice.toFixed(2);
+                            const spanTotal = plus.parentNode.querySelector('.span-total');
+                            spanTotal.innerHTML = menuItem.total;
+                            const rowPrice = plus.parentNode.parentNode.querySelector('.row-price');
+                            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
+                        };
+                    });
+                    return;
+            }
+            const rowTotal = orderContainerRows[indexOfMatch].querySelector('.span-total');
+            const rowPrice = orderContainerRows[indexOfMatch].querySelector('.row-price');
+            rowTotal.innerHTML = menuItem.total;
+            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
+        }
+        minusEle.onclick = () => {
+            let menuItem = menuScores[index];
+            if(menuItem.total < 1) return;
+            --menuItem.total;
+            numberEle.innerHTML = menuItem.total;
+            //MENU PRICE
+            totalPrice -= menuItem.price;
+            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
+            //ORDER CONTAINER
+            const orderContainerRows = orderContainer.querySelectorAll('.row');
+            
+            let foundTitleMatch = false;
+            let outerIndex = index;
+            let indexOfMatch = 0;
+            orderContainerRows.forEach((row, index) => {
+                if(row.getAttribute('menu-index') == outerIndex){
+                    foundTitleMatch = true;
+                    indexOfMatch = index;
+                }
+            });
+            if(!foundTitleMatch) return;
+            const rowTotal = orderContainerRows[indexOfMatch].querySelector('.span-total');
+            const rowPrice = orderContainerRows[indexOfMatch].querySelector('.row-price');
+            if(menuItem.total < 1){
+                orderContainerRows[indexOfMatch].remove();
+                return;
+            }
+            rowTotal.innerHTML = menuItem.total;
+            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
+        }
+            numberEle.innerHTML = orderNum[index];
+    });
+}
+populateOrderNum();
+menuFunc();
+
+//URL FRAGMENT
+const loadURLHash = window.location.hash;
+if(loadURLHash === '#Home') openSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#About') aboutSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Menu') menuSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Location') locationSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Contact') contactSection.scrollIntoView({behavior: 'smooth'});

@@ -1,0 +1,29 @@
+    <div class="menu-col">
+        <% menu.forEach((item, index) => { %>
+            <% if(left){ %>
+            <% if(index % 2 !== 0) { return }%>
+            <% }else{ %>
+                <% if(index % 2 === 0) { return } %>
+                <% } %>
+                <div class="menu-item" order-by="<%= index %>">
+                <h1><%= item.title %></h1>
+                <% item.items.forEach((col, index) => { %>
+                    <div class="price-title">
+                    <div class="title"><%= col.title %></div>
+                    <div class="price"><%= col.price %></div>
+                    </div>
+                    <% if(col.subDesc){ %>
+                        <% col.subDesc.forEach(sub => { %>
+                            <div class="sub-desc"><%= sub %></div>
+                        <% }) %>
+                    <% } %>
+                    <div class="desc"><%= col.desc %></div>
+                    <div class="counter-container">
+                        <div class="minus">-</div>
+                        <div class="number">0</div>
+                        <div class="plus">+</div>
+                    </div>
+                <% }) %>
+                </div>
+       <% }) %>
+    </div>

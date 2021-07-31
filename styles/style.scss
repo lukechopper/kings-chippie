@@ -266,7 +266,6 @@ a, a:link, a:visited, a:hover, a:active{
 }
 .menu{
     padding: 5rem 0 0 0;
-    margin-bottom: -3rem;
     .menu-container{
         width: 100%;
         display: flex;
@@ -297,9 +296,20 @@ a, a:link, a:visited, a:hover, a:active{
             font-weight: 800;
             font-size: 1.5rem;
         }
-        
-        .desc{
+        .counter-container{
             margin-bottom: 1rem;
+            margin-left: -0.5rem;
+            font-size: 1.25rem;
+            user-select: none;
+            .plus,.minus{
+                background-color: #cdcdcd;
+                padding: 0.1rem 1rem;
+                cursor: pointer;
+            }
+        }
+        .counter-container > *{
+            display: inline-block;
+            margin-left: 0.5rem;
         }
         .sub-desc{
             color: #4d4d4d;
@@ -307,6 +317,8 @@ a, a:link, a:visited, a:hover, a:active{
         .price{
             font-size: 1.8rem;
             text-align: right;
+            position: relative;
+            top: -4px;
             width: 200px;
         }
         @media(max-width: $small){
@@ -316,6 +328,108 @@ a, a:link, a:visited, a:hover, a:active{
             }
             .price{
                 text-align: start;
+            }
+        }
+    }
+    .order-container{
+        width: 100%;
+        border: 5px solid black;
+        padding: 1rem 2rem;
+        transition: all 0.4s ease-in-out;
+        &:hover{
+            transform: scale(1.03);
+        } 
+        .row{
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 1.25rem;
+            margin: 1rem 0;
+            .row-title{
+                text-align: left;
+                width: 50%;
+            }
+            .row-total{
+                text-align:center;
+                width: 25%;
+                .plus{
+                    margin-left: 15px;
+                    color: map-get($colors, "lightGray");
+                    cursor: pointer;
+                    user-select: none;
+                    font-size: 1.5rem;
+                }
+                .minus{
+                    margin-right: 15px;
+                    color: map-get($colors, "lightGray");
+                    cursor: pointer;
+                    user-select: none;
+                    font-size: 1.5rem;
+                }
+            }
+            .row-price{
+                text-align:right;
+                width: 25%;
+            }
+            .bold{
+                text-transform: capitalize;
+                font-weight: 800;
+                font-size: 1.5rem;
+            }
+            .title-span{
+                padding-right: 30px;
+            }
+            .delete-icon{
+                cursor: pointer;
+                position: relative;
+                top: 7px;
+                width: 30px;
+                height: 30px;
+                margin-left: -25px;
+            }
+        }
+        .bottom-order{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .total{
+            text-align: right;
+            text-transform: capitalize;
+            font-weight: 800;
+            font-size: 2rem;
+        }
+        .total-price{
+            text-align: right;
+            font-size: 2rem;
+        }
+        .order{
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-transform: capitalize;
+            background-color:black;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: color 0.3s linear;
+            &:hover{
+                color: map-get($colors, "gold");
+            }
+        }
+    }
+    @media(max-width: $large){
+        .order-container{
+            transition: none;
+            &:hover{
+                transform: none;
+            }
+            .order{
+                transition: none;
+                &:hover{
+                    color: white;
+                }
             }
         }
     }
