@@ -1,80 +1,18 @@
 import '../styles/style.scss';
-import {addAndRemoveClasses, trashSVG} from './utils.js';
+import {addAndRemoveClasses, trashSVG} from './partials/utils.js';
 import {gsap} from 'gsap';
-import * as map from './map';
+import axios from 'axios';
+import * as map from './partials/map';
+import * as ele from './partials/elements';
+import * as navBar from './partials/navBar';
 
-const nav = document.getElementById('nav');
-const navLogo = document.getElementById('nav-logo');
-const openSection = document.getElementById('open');
-const openArrow = document.getElementById('open-arrow');
-const hamburger = document.getElementById('hamburger');
-const navItems = document.getElementById('nav-items');
-const hl1 = document.getElementById('hl-1');
-const hl2 = document.getElementById('hl-2');
-const hl3 = document.getElementById('hl-3');
+let overlayMeshMenuItem = {menuItem: null, overlay: false};
 
-const sortNavHeight = (function(){
-
-    let scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
-    let newScroll = null;
-
-    return function(scrollArg){
-        if(innerWidth < 994) return;
-        nav.style.transition = '';
-        navLogo.style.transition = '';
-        newScroll = scrollArg;
-        if(newScroll !== scroll || newScroll === 0){
-            nav.style.transition = 'all 0.15s ease-in-out';
-            navLogo.style.transition = 'all 0.15s ease-in-out';
-        }
-        
-        if(newScroll > 0){
-            nav.style.height = '90px';
-            navLogo.style.width = '80px';
-            return;
-        }
-        nav.style.height = '120px';
-        navLogo.style.width = '100px';
-    }
-})();
-sortNavHeight();
-
-navLogo.onclick = () => {
-    openSection.scrollIntoView({behavior: 'smooth'});
-    window.location.hash = '#Home';
-}
-let hamburgerOpen = false;
-hamburger.onclick = () => {
-    hamburgerOpen = !hamburgerOpen;
-    if(hamburgerOpen){
-        gsap.to(navItems, {duration: 0.5, height:'328px', ease: 'easeInOut'});
-        gsap.to(hl1, {duration: 0.5, ease: 'easeInOut', top: '25px', rotate: '45deg'});
-        gsap.to(hl2, {duration: 0.5, ease: 'easeInOut', opacity: '0'});
-        gsap.to(hl3, {duration: 0.5, ease: 'easeInOut', top: '-19px', rotate: '-45deg'});
-        return;
-    }
-    gsap.to(navItems, {duration: 0.5, height:'0', ease: 'easeInOut'});
-    gsap.to(hl1, {duration: 0.5, ease: 'easeInOut', top: '0', rotate: '0'});
-    gsap.to(hl2, {duration: 0.5, ease: 'easeInOut', opacity: '1'});
-    gsap.to(hl3, {duration: 0.5, ease: 'easeInOut', top: '0', rotate: '0'});
-}
-
-const aboutSection = document.getElementById('about');
-let navLinks = document.querySelectorAll('.nav-links');
-navLinks = Array.prototype.slice.call(navLinks);
-
-openArrow.onclick = () => {
-    aboutSection.scrollIntoView({behavior: 'smooth'});
-}
-navLinks[0].onclick = () => {
-    aboutSection.scrollIntoView({behavior: 'smooth'});
-}
-
-const menuSection = document.getElementById('menu');
 function addMenuItemEventListener(){
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
         item.onmouseenter  = (e) => {
+            overlayMeshMenuItem.menuItem = item;
             if(innerWidth < 994) return;
             let height = item.clientHeight;
             // console.log(height);
@@ -85,6 +23,7 @@ function addMenuItemEventListener(){
             item.style.transform = `scale(${scale})`;
         }
         item.onmouseleave  = () => {
+            if(overlayMeshMenuItem.overlay) return;
             if(innerWidth < 994) return;
             item.style.transform = `scale(${1})`;
         }
@@ -92,57 +31,41 @@ function addMenuItemEventListener(){
 }
 addMenuItemEventListener();
 
-navLinks[1].onclick = () => {
-    menuSection.scrollIntoView({behavior: 'smooth'});
-}
-
-const locationSection = document.getElementById('location');
-
-navLinks[2].onclick = () => {
-    locationSection.scrollIntoView({behavior: 'smooth'});
-}
-
-const contactSection = document.getElementById('contact');
-
-navLinks[3].onclick = () => {
-    contactSection.scrollIntoView({behavior: 'smooth'});
-}
-
 let scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
 addEventListener('scroll', () => {
     scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
-    sortNavHeight(scroll);
+    navBar.sortNavHeight(scroll);
     //OPEN section
-    if(scroll < aboutSection.offsetTop - 200){
-        if(!navLinks[0].classList.contains('selected')) return;
-        addAndRemoveClasses('', 'selected', navLinks);
+    if(scroll < ele.aboutSection.offsetTop - 200){
+        if(!ele.navLinks[0].classList.contains('selected')) return;
+        addAndRemoveClasses('', 'selected', ele.navLinks);
         return;
     }
     //ABOUT section
-    if(scroll >= aboutSection.offsetTop - 200 && scroll < menuSection.offsetTop - 200){
-        if(navLinks[0].classList.contains('selected')) return;
-        addAndRemoveClasses('selected', '', navLinks[0]);
-        addAndRemoveClasses('', 'selected', navLinks.slice(1));
+    if(scroll >= ele.aboutSection.offsetTop - 200 && scroll < ele.menuSection.offsetTop - 200){
+        if(ele.navLinks[0].classList.contains('selected')) return;
+        addAndRemoveClasses('selected', '', ele.navLinks[0]);
+        addAndRemoveClasses('', 'selected', ele.navLinks.slice(1));
     }
     //MENU section
-    if(scroll >= menuSection.offsetTop - 200 && scroll < locationSection.offsetTop - 200){
-        if(navLinks[1].classList.contains('selected')) return;
-        addAndRemoveClasses('selected', '', navLinks[1]);
-        addAndRemoveClasses('', 'selected', [...navLinks.slice(2), navLinks[0]]);
+    if(scroll >= ele.menuSection.offsetTop - 200 && scroll < ele.locationSection.offsetTop - 200){
+        if(ele.navLinks[1].classList.contains('selected')) return;
+        addAndRemoveClasses('selected', '', ele.navLinks[1]);
+        addAndRemoveClasses('', 'selected', [...ele.navLinks.slice(2), ele.navLinks[0]]);
     }
     //LOCATION section
-    if(scroll >= locationSection.offsetTop - 200 && scroll < contactSection.offsetTop - 200){
-        if(navLinks[2].classList.contains('selected')) return;
-        addAndRemoveClasses('selected', '', navLinks[2]);
-        addAndRemoveClasses('', 'selected', [...navLinks.slice(0, 2), navLinks[3]]);
+    if(scroll >= ele.locationSection.offsetTop - 200 && scroll < ele.contactSection.offsetTop - 200){
+        if(ele.navLinks[2].classList.contains('selected')) return;
+        addAndRemoveClasses('selected', '', ele.navLinks[2]);
+        addAndRemoveClasses('', 'selected', [...ele.navLinks.slice(0, 2), ele.navLinks[3]]);
         if(document.querySelector('.mapboxgl-control-container') === (undefined || null)){
             map.loadLocation();
         }
     }
-    if(scroll >= contactSection.offsetTop - 200){
-        addAndRemoveClasses('selected', '', navLinks[3]);
-        addAndRemoveClasses('', 'selected', [...navLinks.slice(0, 3)]);
+    if(scroll >= ele.contactSection.offsetTop - 200){
+        addAndRemoveClasses('selected', '', ele.navLinks[3]);
+        addAndRemoveClasses('', 'selected', [...ele.navLinks.slice(0, 3)]);
     }
 });
 
@@ -168,21 +91,19 @@ function smallMenu(){
 if(innerWidth < 780){
     smallMenu();
 }
-let priceContainer = menuContainer.querySelectorAll('.price-title');
-let counterContainer = menuContainer.querySelectorAll('.counter-container');
 
 addEventListener('resize', () => {
     //Animate nav-bar. Related to CSS media queries. Counter 'sortNavHeight' function.
     if(innerWidth < 994){
-        nav.style.height = '';
-        navLogo.style.width = '';
-        nav.style.transition = 'all 0.15s ease-in-out';
-        navLogo.style.transition = 'all 0.15s ease-in-out';
+        ele.nav.style.height = '';
+        ele.navLogo.style.width = '';
+        ele.nav.style.transition = 'all 0.15s ease-in-out';
+        ele.navLogo.style.transition = 'all 0.15s ease-in-out';
     }else if(innerWidth >= 994 && scroll > 0){
-        nav.style.height = '90px';
-        navLogo.style.width = '80px';
-        nav.style.transition = '';
-        navLogo.style.transition = '';
+        ele.nav.style.height = '90px';
+        ele.navLogo.style.width = '80px';
+        ele.nav.style.transition = '';
+        ele.navLogo.style.transition = '';
     }
     if(innerWidth < 780){
         //MENU
@@ -192,14 +113,13 @@ addEventListener('resize', () => {
         return;
     }
     if(innerWidth >= 780){
-        hamburgerOpen = false;
-        gsap.to(navItems, {duration: 0, height:'0' });
-        gsap.to(hl1, {duration: 0,  top: '0', rotate: '0'});
-        gsap.to(hl2, {duration: 0,  opacity: '1'});
-        gsap.to(hl3, {duration: 0,  top: '0', rotate: '0'});
+        navBar.setHamburgerOpen(false);
+        gsap.to(ele.navItems, {duration: 0, height:'0' });
+        gsap.to(ele.hl1, {duration: 0,  top: '0', rotate: '0'});
+        gsap.to(ele.hl2, {duration: 0,  opacity: '1'});
+        gsap.to(ele.hl3, {duration: 0,  top: '0', rotate: '0'});
     }
     if(innerWidth >= 780 && document.querySelectorAll('.menu-col').length < 1){
-        populateOrderNum(counterContainer);
         let col1 = document.createElement('div');
         col1.classList.add('menu-col');
         let col2 = document.createElement('div');
@@ -216,153 +136,187 @@ addEventListener('resize', () => {
 });
 
 let menuScores = [];
-let orderNum = [];
 const orderContainer = document.getElementById('order-container');
-let totalPrice = 0;
-
-function populateOrderNum(){
-    orderNum = [];
-    counterContainer.forEach((item, index) => {
-        const number = Number(item.querySelector('.number').innerHTML);
-        orderNum.push(number);
-    });
-}
+let menuItem = null; //Call after GET request
 
 function menuFunc(){
 
     menuScores = [];
 
-    priceContainer = menuContainer.querySelectorAll('.price-title');
-    counterContainer = menuContainer.querySelectorAll('.counter-container');
+    let priceContainer = menuContainer.querySelectorAll('.price-title');
+    let addBtns = menuContainer.querySelectorAll('.add-btn');
 
     priceContainer.forEach((item, index) => {
+        const parentId = item.getAttribute('parent-id');
+        const childId = item.getAttribute('child-id');
         let price = item.querySelector('.price').innerHTML;
-        const title = item.querySelector('.title').innerHTML;
         price = price.match(/[\d|\.]/g);
         price = Number(price.join(''));
-        const total = orderNum[index];
-        const menuItem = {index, title, price, total};
+        const menuItem = {parentId, childId, price};
         menuScores.push(menuItem);
     });
-    
-    counterContainer.forEach((item, index) => {
-        const plusEle = item.querySelector('.plus');
-        const minusEle = item.querySelector('.minus');
-        const numberEle = item.querySelector('.number');
-        plusEle.onclick = () => {
-            let menuItem = menuScores[index];
-            ++menuItem.total;
-            numberEle.innerHTML = menuItem.total;
-            //MENU PRICE
-            totalPrice += menuItem.price;
-            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
-            //ORDER CONTAINER
-            const orderContainerRows = orderContainer.querySelectorAll('.row');
 
-            let foundTitleMatch = false;
-            let outerIndex = index;
-            let indexOfMatch = 0;
-            orderContainerRows.forEach((row, index) => {
-                if(row.getAttribute('menu-index') == outerIndex){
-                    foundTitleMatch = true;
-                    indexOfMatch = index;
+    addBtns.forEach((item, index) => {
+        item.onclick = () => {
+
+            const menuScore = menuScores[index];
+            axios.get('/menu/'+menuScore.parentId+'/'+menuScore.childId).then(res => {
+                let beforeOverlayMeshMenuItem = overlayMeshMenuItem.menuItem;
+                overlayMeshMenuItem.menuItem = null;
+                overlayMeshMenuItem.overlay = true;
+                menuItem = res.data.data;
+                const overlay = document.createElement('div');
+                overlay.id = 'overlay';
+                overlay.classList.add('overlay');
+                overlay.onclick = (e) => {
+                    if(e.target.id !== 'overlay') return;
+                    e.target.remove();
+                    document.body.style.overflow = '';
+                    setTimeout(() => {
+                        overlayMeshMenuItem.overlay = false;
+                        if(beforeOverlayMeshMenuItem !== overlayMeshMenuItem.menuItem){
+                            beforeOverlayMeshMenuItem.style.transform = `scale(${1})`;
+                        }
+                    }, 10);
+                    
                 }
-            });
-            if(!foundTitleMatch){
-                menuTotal.insertAdjacentHTML('beforebegin', `<div class="row" menu-index="${index}"><p class="row-title"><span class="title-span">${menuItem.title}</span>${trashSVG}</p>
-                    <p class="row-total"><span class="minus">—</span><span class="span-total">${menuItem.total}</span><span class="plus">+</span></p><p class="row-price">£${menuItem.price.toFixed(2)}</p></div>`);
-                    orderContainer.querySelectorAll('.delete-icon').forEach(icon => {
-                        icon.onclick = () => {
-                            let menuIndex = Number(icon.parentNode.parentNode.getAttribute('menu-index'));
-                            icon.parentNode.parentNode.remove();
-                            let menuItem = menuScores[menuIndex];
-                            let menuElement = counterContainer[menuIndex];
-                            totalPrice -= (menuItem.total * menuItem.price);
-                            menuItem.total = 0;
-                            menuElement.querySelector('.number').innerHTML = menuItem.total;
-                            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
-                        };
+                const card = document.createElement('div');
+                card.id = 'card';
+                card.classList.add('card');
+                card.insertAdjacentHTML('beforeend', `<h1>${menuItem.title}</h1>`);
+                card.insertAdjacentHTML('beforeend', `<p class="price">${menuItem.price}</p>`);
+                card.insertAdjacentHTML('beforeend', `<p class="sub-para">${menuItem.desc}</p>`);
+                const sides = menuItem.sides[0];
+                if(sides){
+                    card.insertAdjacentHTML('beforeend', `<p class="sides-title">${sides.title ? sides.title : 'Choose One'}</p>`);
+                    sides.option.forEach(option => {
+                        const optionRow = document.createElement('div');
+                        optionRow.classList.add('option-row');
+                        optionRow.setAttribute('row-num', '0');
+                        card.append(optionRow);
+                        optionRow.addEventListener('click', clickMenuItem);
+                        optionRow.insertAdjacentHTML('beforeend', `<p>${option.type}</p>
+                        ${option.price ? `<p price-type="${typeof option.price === 'string' ? 'string' : 'number'}">${typeof option.price === 'string' ? '£'+(menuScore.price + Number(option.price.replace('+',''))) : '£'+option.price.toFixed(2)}</p>` : ''}`);
                     });
-                    orderContainer.querySelectorAll('.minus').forEach(minus => {
-                        minus.onclick = () => {
-                            let menuIndex = Number(minus.parentNode.parentNode.getAttribute('menu-index'));
-                            let menuItem = menuScores[menuIndex];
-                            let menuElement = counterContainer[menuIndex];
-                            --menuItem.total;
-                            if(menuItem.total < 1){
-                                minus.parentNode.parentNode.remove();
-                            }
-                            menuElement.querySelector('.number').innerHTML = menuItem.total;
-                            totalPrice -= menuItem.price;
-                            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
-                            const spanTotal = minus.parentNode.querySelector('.span-total');
-                            spanTotal.innerHTML = menuItem.total;
-                            const rowPrice = minus.parentNode.parentNode.querySelector('.row-price');
-                            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
-                        };
-                    });
-                    orderContainer.querySelectorAll('.plus').forEach(plus => {
-                        plus.onclick = () => {
-                            let menuIndex = Number(plus.parentNode.parentNode.getAttribute('menu-index'));
-                            let menuItem = menuScores[menuIndex];
-                            let menuElement = counterContainer[menuIndex];
-                            ++menuItem.total;
-                            menuElement.querySelector('.number').innerHTML = menuItem.total;
-                            totalPrice += menuItem.price;
-                            menuTotalPrice.innerHTML = '£'+totalPrice.toFixed(2);
-                            const spanTotal = plus.parentNode.querySelector('.span-total');
-                            spanTotal.innerHTML = menuItem.total;
-                            const rowPrice = plus.parentNode.parentNode.querySelector('.row-price');
-                            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
-                        };
-                    });
-                    return;
-            }
-            const rowTotal = orderContainerRows[indexOfMatch].querySelector('.span-total');
-            const rowPrice = orderContainerRows[indexOfMatch].querySelector('.row-price');
-            rowTotal.innerHTML = menuItem.total;
-            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
-        }
-        minusEle.onclick = () => {
-            let menuItem = menuScores[index];
-            if(menuItem.total < 1) return;
-            --menuItem.total;
-            numberEle.innerHTML = menuItem.total;
-            //MENU PRICE
-            totalPrice -= menuItem.price;
-            menuTotalPrice.innerHTML = '£'+Math.abs(totalPrice).toFixed(2);
-            //ORDER CONTAINER
-            const orderContainerRows = orderContainer.querySelectorAll('.row');
-            
-            let foundTitleMatch = false;
-            let outerIndex = index;
-            let indexOfMatch = 0;
-            orderContainerRows.forEach((row, index) => {
-                if(row.getAttribute('menu-index') == outerIndex){
-                    foundTitleMatch = true;
-                    indexOfMatch = index;
+                }else{
+                    card.insertAdjacentHTML('beforeend', `<div class="counter-container">
+                    <div class="minus no-select">—</div>
+                    <div>1</div>
+                    <div class="plus">+</div>
+                    </div>`);
+                    card.querySelector('.minus').addEventListener('click', cardMinusClick);
+                    card.querySelector('.plus').addEventListener('click', cardPlusClick);
                 }
+                const priceBtn = document.createElement('div');
+                priceBtn.classList.add('price-btn');
+                if(sides) priceBtn.classList.add('no-select');
+                priceBtn.innerHTML = `<p>Add to order</p><p>£${menuScore.price}</p>`
+                card.append(priceBtn);
+
+                overlay.prepend(card);
+                document.body.prepend(overlay);
+                document.body.style.overflow = 'hidden';
+                
             });
-            if(!foundTitleMatch) return;
-            const rowTotal = orderContainerRows[indexOfMatch].querySelector('.span-total');
-            const rowPrice = orderContainerRows[indexOfMatch].querySelector('.row-price');
-            if(menuItem.total < 1){
-                orderContainerRows[indexOfMatch].remove();
-                return;
-            }
-            rowTotal.innerHTML = menuItem.total;
-            rowPrice.innerHTML = '£'+(menuItem.total * menuItem.price).toFixed(2);
         }
-            numberEle.innerHTML = orderNum[index];
     });
 }
-populateOrderNum();
 menuFunc();
+
+function clickMenuItem(e){
+    let index = Number(e.target.getAttribute('row-num'));
+    let rowEle = e.target;
+    if(!e.target.classList.contains('option-row')){
+        index = Number(e.target.parentNode.getAttribute('row-num'));
+        rowEle = e.target.parentNode;
+    }
+    let sameRowEle = rowEle.parentNode.querySelectorAll(`.option-row[row-num="${index}"]`);
+    sameRowEle = Array.prototype.slice.call(sameRowEle);
+    let rowIndex = sameRowEle.indexOf(rowEle);
+    const card = document.getElementById('card');
+    const priceBtn = card.childNodes[card.childNodes.length - 1];
+    const sides = menuItem.sides[index + 1];
+    //Clicked on price
+    let checkIfNumberPriceRow = null;
+    const numberElement = card.querySelectorAll('.counter-container div')[1];
+    let numberOfItems = numberElement ? Number(numberElement.innerHTML) : 1;
+    sameRowEle.forEach((sameRow, index) => {
+        if(!sameRow.getElementsByTagName('p')[1]) return;
+        if(sameRow.getElementsByTagName('p')[1].getAttribute('price-type') === 'number' && sameRow.classList.contains('highlighted')){
+            checkIfNumberPriceRow = index;
+        }
+    });
+    if(checkIfNumberPriceRow !== null){
+        let oldPrice = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£',''));
+        let price = sameRowEle[checkIfNumberPriceRow].getElementsByTagName('p')[1];
+        price = Number(price.innerHTML.replace('£',''));
+        priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice - (price * numberOfItems)).toFixed(2);
+    }
+    if(rowEle.getElementsByTagName('p').length > 1){
+        let price = rowEle.getElementsByTagName('p')[1];
+        let priceType = price.getAttribute('price-type');
+        price = Number(price.innerHTML.replace('£',''));
+        if(priceType === 'string'){
+            priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(price * numberOfItems).toFixed(2);
+        }else if(priceType === 'number'){
+            let oldPrice = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£',''));
+            priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice + (price * numberOfItems)).toFixed(2);
+        }
+    }
+    addAndRemoveClasses('highlighted', '', rowEle);
+    addAndRemoveClasses('', 'highlighted', [...sameRowEle.slice(0, rowIndex), ...sameRowEle.slice(rowIndex + 1)]);
+    if(sides){
+        if(rowEle.parentNode.querySelectorAll(`.option-row[row-num="${index + 1}"]`).length > 1) return;
+        priceBtn.insertAdjacentHTML('beforebegin', `<p class="sides-title">${sides.title ? sides.title : 'Choose One'}</p>`);
+        sides.option.forEach(option => {
+            const optionRow = document.createElement('div');
+            optionRow.classList.add('option-row');
+            optionRow.setAttribute('row-num', `${index + 1}`);
+            priceBtn.insertAdjacentElement('beforebegin', optionRow);
+            optionRow.addEventListener('click', clickMenuItem);
+            optionRow.insertAdjacentHTML('beforeend', `<p>${option.type}</p>
+            ${option.price ? `<p price-type="${typeof option.price === 'string' ? 'string' : 'number'}">${typeof option.price === 'string' ? '£'+(menuScore.price + Number(option.price.replace('+',''))) : '£'+option.price.toFixed(2)}</p>` : ''}`);
+        });
+    }else if(!card.querySelector('.counter-container')){
+        priceBtn.classList.remove('no-select');
+        priceBtn.insertAdjacentHTML('beforebegin', `<div class="counter-container">
+        <div class="minus no-select">—</div>
+        <div>1</div>
+        <div class="plus">+</div>
+        </div>`);
+        card.querySelector('.minus').addEventListener('click', cardMinusClick);
+        card.querySelector('.plus').addEventListener('click', cardPlusClick);
+    }
+};
+
+function cardMinusClick(e){
+    let element = e.target;
+    if(element.classList.contains('no-select')) return;
+    let numberElement = element.nextSibling.nextSibling;
+    let oldNumber = Number(numberElement.innerHTML);
+    numberElement.innerHTML = oldNumber - 1;
+    if(oldNumber <= 2){
+        addAndRemoveClasses('no-select', '', element);
+    }
+    const priceBtn = e.target.parentNode.nextSibling;
+    let oldPriceBtn = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£', '')) / oldNumber;
+    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPriceBtn * (oldNumber - 1)).toFixed(2);
+};
+function cardPlusClick(e){
+    let numberElement = e.target.previousSibling.previousSibling;
+    let minusElement = e.target.parentNode.querySelector('.minus');
+    let oldNumber = Number(numberElement.innerHTML);
+    if(oldNumber < 2) addAndRemoveClasses('', 'no-select', minusElement);
+    numberElement.innerHTML = oldNumber + 1;
+    const priceBtn = e.target.parentNode.nextSibling;
+    let oldPriceBtn = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£', '')) / oldNumber;
+    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPriceBtn * (oldNumber + 1)).toFixed(2);
+};
 
 //URL FRAGMENT
 const loadURLHash = window.location.hash;
-if(loadURLHash === '#Home') openSection.scrollIntoView({behavior: 'smooth'});
-if(loadURLHash === '#About') aboutSection.scrollIntoView({behavior: 'smooth'});
-if(loadURLHash === '#Menu') menuSection.scrollIntoView({behavior: 'smooth'});
-if(loadURLHash === '#Location') locationSection.scrollIntoView({behavior: 'smooth'});
-if(loadURLHash === '#Contact') contactSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Home') ele.openSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#About') ele.aboutSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Menu') ele.menuSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Location') ele.locationSection.scrollIntoView({behavior: 'smooth'});
+if(loadURLHash === '#Contact') ele.contactSection.scrollIntoView({behavior: 'smooth'});

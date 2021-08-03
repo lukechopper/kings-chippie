@@ -362,25 +362,11 @@ a, a:link, a:visited, a:hover, a:active {
       -webkit-box-pack: justify;
       -webkit-justify-content: space-between;
           -ms-flex-pack: justify;
-              justify-content: space-between; }
+              justify-content: space-between;
+      margin-bottom: -0.5rem; }
     .menu .menu-item .title {
       font-weight: 800;
       font-size: 1.5rem; }
-    .menu .menu-item .counter-container {
-      margin-bottom: 1rem;
-      margin-left: -0.5rem;
-      font-size: 1.25rem;
-      -webkit-user-select: none;
-         -moz-user-select: none;
-          -ms-user-select: none;
-              user-select: none; }
-      .menu .menu-item .counter-container .plus, .menu .menu-item .counter-container .minus {
-        background-color: #cdcdcd;
-        padding: 0.1rem 1rem;
-        cursor: pointer; }
-    .menu .menu-item .counter-container > * {
-      display: inline-block;
-      margin-left: 0.5rem; }
     .menu .menu-item .sub-desc {
       color: #4d4d4d; }
     .menu .menu-item .price {
@@ -389,6 +375,12 @@ a, a:link, a:visited, a:hover, a:active {
       position: relative;
       top: -4px;
       width: 200px; }
+    .menu .menu-item .add-btn {
+      background-color: lightgray;
+      text-align: center;
+      width: 60px;
+      padding: 0.5rem 0;
+      cursor: pointer; }
     @media (max-width: 577px) {
       .menu .menu-item .price-title {
         -webkit-box-orient: vertical;
@@ -628,4 +620,100 @@ a, a:link, a:visited, a:hover, a:active {
     -webkit-transform-origin: center;
             transform-origin: center;
     cursor: default; }
+
+.overlay {
+  position: fixed;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); }
+  .overlay .card {
+    background-color: white;
+    padding: 2rem;
+    max-width: 450px;
+    margin: auto 10px;
+    width: 100%;
+    border: 5px solid black; }
+    .overlay .card h1 {
+      text-align: center;
+      margin: -0.5rem 0; }
+    .overlay .card .price {
+      font-weight: 800;
+      font-size: 1.25rem;
+      text-align: center; }
+    .overlay .card .sub-para {
+      text-align: center; }
+    .overlay .card .sides-title {
+      font-size: 1.5rem;
+      font-weight: 800; }
+    .overlay .card .counter-container {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      font-size: 4rem;
+      margin: -1rem 0; }
+      .overlay .card .counter-container .plus, .overlay .card .counter-container .minus {
+        margin: 0 20px;
+        -webkit-user-select: none;
+           -moz-user-select: none;
+            -ms-user-select: none;
+                user-select: none;
+        cursor: pointer;
+        color: #bf151a; }
+        .overlay .card .counter-container .plus.no-select, .overlay .card .counter-container .minus.no-select {
+          color: lightgray;
+          cursor: default; }
+    .overlay .card .highlighted {
+      color: #bf151a; }
+    .overlay .card .option-row {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      font-size: 1.25rem;
+      cursor: pointer; }
+    .overlay .card .price-btn {
+      background-color: #bf151a;
+      padding: 0.5rem 1rem;
+      color: white;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-top: 1rem;
+      cursor: pointer; }
+      .overlay .card .price-btn.no-select {
+        background-color: lightgray;
+        cursor: default; }
 

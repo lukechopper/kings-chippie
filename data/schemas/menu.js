@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 
+const sidesSchema = new mongoose.Schema({
+    title: String,
+    select: Number,
+    option: {
+        type: [
+            {
+                type: {type: String},
+                price: mongoose.Mixed, //Only present if it has price listed on GUI
+                options: Array,
+                desc: String //Only used with 'select'
+            }
+        ],
+    }
+});
+
 const menuItemsSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -15,6 +30,10 @@ const menuItemsSchema = new mongoose.Schema({
     },
     subDesc: {
         type: [String],
+        required: false
+    },
+    sides: {
+        type: [sidesSchema],
         required: false
     }
 });
