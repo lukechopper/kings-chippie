@@ -1216,7 +1216,7 @@ module.exports = [
             "subDesc" : [],
             "title" : "Egg Fried Rice, Chips & Curry Sauce",
             "desc" : "A Kings favourite. Chinese Egg Fried Rice with a regular portion of reshly prepared chips served with our legendary, in house and hand made Chinese Curry Sauce",
-            "price" : "from £4.45",
+            "price" : "£4.45",
             "sides": [
                 {
                     option: vinegarSides
@@ -1238,7 +1238,7 @@ module.exports = [
             "subDesc" : [],
             "title" : "Chicken Curry, Chips & Egg Fried Rice",
             "desc" : "Chicken and onion stir fry served with our famous Curry and Egg Fried Rice",
-            "price" : "from £5.45",
+            "price" : "£5.45",
             "sides": [
                 {
                     option: smallLarge2

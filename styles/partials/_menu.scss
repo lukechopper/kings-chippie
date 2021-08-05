@@ -42,10 +42,12 @@
             width: 200px;
         }
         .add-btn{
-            background-color: lightgray;
+            background-color: black;
+            color: white;
             text-align: center;
             width: 60px;
             padding: 0.5rem 0;
+            font-weight: 800;
             cursor: pointer;
         }
         @media(max-width: $small){
@@ -63,58 +65,51 @@
         border: 5px solid black;
         padding: 1rem 2rem;
         transition: all 0.4s ease-in-out;
-        &:hover{
-            transform: scale(1.03);
-        } 
+        &.flex-mode{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .no-orders{
+            font-size: 3rem;
+        }
         .row{
-            width: 100%;
             display: flex;
             justify-content: space-between;
-            text-align: center;
-            font-size: 1.25rem;
-            margin: 1rem 0;
-            .row-title{
-                text-align: left;
-                width: 50%;
-            }
-            .row-total{
-                text-align:center;
-                width: 25%;
-                .plus{
-                    margin-left: 15px;
-                    color: map-get($colors, "lightGray");
-                    cursor: pointer;
-                    user-select: none;
-                    font-size: 1.5rem;
+            cursor: pointer;
+            .num-and-name{
+                display: flex;
+                font-size: 1.25rem;
+                .title-options{
+                    display: flex;
+                    flex-direction: column;
+                    .options{
+                        color: #4d4d4d;
+                        margin-top: -10px;
+                        font-size: 1rem;
+                    }
                 }
-                .minus{
-                    margin-right: 15px;
-                    color: map-get($colors, "lightGray");
-                    cursor: pointer;
-                    user-select: none;
-                    font-size: 1.5rem;
+                .amount{
+                    margin-right: 0.5rem;
+                    color: white;
+                    background-color: map-get($colors, "red");
+                    border-radius: 50%;
+                    font-size: 0.95rem;
+                    text-align: center;
+                    min-width: 25px;
+                    height: 25px;
+                    position: relative;
+                    top: 2px;
                 }
             }
-            .row-price{
-                text-align:right;
-                width: 25%;
+            .price-and-delete{
+                display: flex;
+                .price{
+                    font-size: 1.7rem;
+                    padding-left: 10px;
+                }
             }
-            .bold{
-                text-transform: capitalize;
-                font-weight: 800;
-                font-size: 1.5rem;
-            }
-            .title-span{
-                padding-right: 30px;
-            }
-            .delete-icon{
-                cursor: pointer;
-                position: relative;
-                top: 7px;
-                width: 30px;
-                height: 30px;
-                margin-left: -25px;
-            }
+            
         }
         .bottom-order{
             display: flex;

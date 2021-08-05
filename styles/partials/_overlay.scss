@@ -18,6 +18,22 @@
         margin: auto 10px;
         width: 100%;
         border: 5px solid black;
+        position: relative;
+        .cross{
+            position: absolute;
+            top: -25px;
+            right: 10px;
+            font-size: 4rem;
+            cursor: pointer;
+            color: map-get($colors, "red");
+        }
+        @media(max-width: $medium){
+            .cross{
+                font-size: 3.5rem;
+                top: -30px;
+                right: 3px;
+            }
+        }
         h1{
             text-align: center;
             margin: -0.5rem 0;
@@ -58,6 +74,21 @@
             justify-content: space-between;
             font-size: 1.25rem;
             cursor: pointer;
+            user-select: none;
+            .sub-options-type{
+                padding-right: 10px;
+            }
+            .sub-options-price{
+                display: flex;
+            }
+            .options-counter{
+                margin-right: 0.5rem;
+                color: white;
+                background-color: map-get($colors, "red");
+                padding: 0.1rem 0.8rem;
+                border-radius: 50rem;
+                font-size: 0.95rem;
+            }
         }
         .price-btn{
             background-color: map-get($colors, "red");

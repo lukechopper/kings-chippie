@@ -13,3 +13,5 @@ export const navLinks = Array.prototype.slice.call(navLinksEle);
 export const menuSection = document.getElementById('menu');
 export const locationSection = document.getElementById('location');
 export const contactSection = document.getElementById('contact');
+//ORDER CONTAINER
+export const orderContainer = document.getElementById('order-container');

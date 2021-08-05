@@ -1,15 +1,19 @@
 import '../styles/style.scss';
-import {addAndRemoveClasses, trashSVG} from './partials/utils.js';
+import {addAndRemoveClasses, trashSVG, trashSVG2} from './partials/utils.js';
 import {gsap} from 'gsap';
 import axios from 'axios';
 import * as map from './partials/map';
 import * as ele from './partials/elements';
 import * as navBar from './partials/navBar';
+import {submitOrder} from './submitOrder';
 
-let overlayMeshMenuItem = {menuItem: null, overlay: false};
+export let overlayMeshMenuItem = {menuItem: null, overlay: false};
+export let beforeOverlayMeshMenuItem = null;
 
 function addMenuItemEventListener(){
-    const menuItems = document.querySelectorAll('.menu-item');
+    let menuItems = document.querySelectorAll('.menu-item');
+    menuItems = Array.prototype.slice.call(menuItems);
+    menuItems.push(ele.orderContainer);
     menuItems.forEach(item => {
         item.onmouseenter  = (e) => {
             overlayMeshMenuItem.menuItem = item;
@@ -135,8 +139,22 @@ addEventListener('resize', () => {
     }
 });
 
+export function prepareOverlay(){
+    beforeOverlayMeshMenuItem = overlayMeshMenuItem.menuItem;
+    overlayMeshMenuItem.menuItem = null;
+    overlayMeshMenuItem.overlay = true;
+}
+
+export function unprepareOverlay(){
+    setTimeout(() => {
+        overlayMeshMenuItem.overlay = false;
+        if(beforeOverlayMeshMenuItem !== overlayMeshMenuItem.menuItem){
+            beforeOverlayMeshMenuItem.style.transform = `scale(${1})`;
+        }
+    }, 10);
+}
+
 let menuScores = [];
-const orderContainer = document.getElementById('order-container');
 let menuItem = null; //Call after GET request
 
 function menuFunc(){
@@ -161,9 +179,7 @@ function menuFunc(){
 
             const menuScore = menuScores[index];
             axios.get('/menu/'+menuScore.parentId+'/'+menuScore.childId).then(res => {
-                let beforeOverlayMeshMenuItem = overlayMeshMenuItem.menuItem;
-                overlayMeshMenuItem.menuItem = null;
-                overlayMeshMenuItem.overlay = true;
+                prepareOverlay();
                 menuItem = res.data.data;
                 const overlay = document.createElement('div');
                 overlay.id = 'overlay';
@@ -172,17 +188,26 @@ function menuFunc(){
                     if(e.target.id !== 'overlay') return;
                     e.target.remove();
                     document.body.style.overflow = '';
+                    unprepareOverlay();
+                }
+                const card = document.createElement('div');
+                card.setAttribute('menu-score-index', index);
+                card.id = 'card';
+                card.classList.add('card');
+                const cross = document.createElement('div');
+                cross.innerHTML = 'x';
+                cross.classList.add('cross');
+                card.prepend(cross);
+                cross.onclick = (e) => {
+                    overlay.remove();
+                    document.body.style.overflow = '';
                     setTimeout(() => {
                         overlayMeshMenuItem.overlay = false;
                         if(beforeOverlayMeshMenuItem !== overlayMeshMenuItem.menuItem){
                             beforeOverlayMeshMenuItem.style.transform = `scale(${1})`;
                         }
                     }, 10);
-                    
                 }
-                const card = document.createElement('div');
-                card.id = 'card';
-                card.classList.add('card');
                 card.insertAdjacentHTML('beforeend', `<h1>${menuItem.title}</h1>`);
                 card.insertAdjacentHTML('beforeend', `<p class="price">${menuItem.price}</p>`);
                 card.insertAdjacentHTML('beforeend', `<p class="sub-para">${menuItem.desc}</p>`);
@@ -193,8 +218,14 @@ function menuFunc(){
                         const optionRow = document.createElement('div');
                         optionRow.classList.add('option-row');
                         optionRow.setAttribute('row-num', '0');
+                        optionRow.setAttribute('extra-options', option.options.length >= 1 ? 'true' : 'false');
+                        if(sides.select) optionRow.setAttribute('extra-options', 'isExtraOptions');
                         card.append(optionRow);
-                        optionRow.addEventListener('click', clickMenuItem);
+                        if(sides.select){
+                            optionRow.addEventListener('click', clickMenuItemSelect);
+                        }else{
+                            optionRow.addEventListener('click', clickMenuItem);
+                        }
                         optionRow.insertAdjacentHTML('beforeend', `<p>${option.type}</p>
                         ${option.price ? `<p price-type="${typeof option.price === 'string' ? 'string' : 'number'}">${typeof option.price === 'string' ? '£'+(menuScore.price + Number(option.price.replace('+',''))) : '£'+option.price.toFixed(2)}</p>` : ''}`);
                     });
@@ -208,27 +239,49 @@ function menuFunc(){
                     card.querySelector('.plus').addEventListener('click', cardPlusClick);
                 }
                 const priceBtn = document.createElement('div');
+                priceBtn.addEventListener('click', submitOrder);
                 priceBtn.classList.add('price-btn');
                 if(sides) priceBtn.classList.add('no-select');
-                priceBtn.innerHTML = `<p>Add to order</p><p>£${menuScore.price}</p>`
+                priceBtn.innerHTML = `<p>Add to order</p><p>£${menuScore.price.toFixed(2)}</p>`
                 card.append(priceBtn);
 
                 overlay.prepend(card);
                 document.body.prepend(overlay);
                 document.body.style.overflow = 'hidden';
-                
             });
         }
     });
 }
 menuFunc();
 
-function clickMenuItem(e){
+export function clickMenuItem(e){
     let index = Number(e.target.getAttribute('row-num'));
     let rowEle = e.target;
     if(!e.target.classList.contains('option-row')){
         index = Number(e.target.parentNode.getAttribute('row-num'));
         rowEle = e.target.parentNode;
+    }
+    let extraOptions = rowEle.getAttribute('extra-options');
+    if(extraOptions === 'true'){
+        if(rowEle.nextSibling.getAttribute('extra-title') !== 'true'){
+            let options = menuItem.sides[index].option.find(opt => opt.type === rowEle.getElementsByTagName('p')[0].innerHTML);
+            const subOptionsTitle = document.createElement('p');
+            subOptionsTitle.classList.add('sides-title');
+            subOptionsTitle.setAttribute('extra-title', 'true');
+            subOptionsTitle.innerHTML = options.type;
+            rowEle.insertAdjacentElement('afterend', subOptionsTitle);
+            const optionRowContainer = document.createElement('div');
+            options.options.forEach(opt => {
+                const optionRow = document.createElement('div');
+                optionRow.classList.add('option-row');
+                optionRow.setAttribute('extra-options-row', 'true');
+                optionRow.addEventListener('click', clickOptionRow);
+                optionRowContainer.append(optionRow);
+                optionRow.insertAdjacentHTML('beforeend', `<p class="sub-options-type">${opt.type}</p>
+                ${opt.price ? `<div class="sub-options-price"><p class="row-price">${'£'+opt.price.toFixed(2)}</p>` : ''}</div>`);
+            });
+            subOptionsTitle.insertAdjacentElement('afterend',optionRowContainer);
+        }
     }
     let sameRowEle = rowEle.parentNode.querySelectorAll(`.option-row[row-num="${index}"]`);
     sameRowEle = Array.prototype.slice.call(sameRowEle);
@@ -241,6 +294,11 @@ function clickMenuItem(e){
     const numberElement = card.querySelectorAll('.counter-container div')[1];
     let numberOfItems = numberElement ? Number(numberElement.innerHTML) : 1;
     sameRowEle.forEach((sameRow, index) => {
+        //Remove sub options
+        if(sameRow.getAttribute('extra-options') === 'true' && sameRow.nextSibling.getAttribute('extra-title') === 'true' && index !== rowIndex){
+            sameRow.nextSibling.remove();
+            sameRow.nextSibling.remove();
+        }
         if(!sameRow.getElementsByTagName('p')[1]) return;
         if(sameRow.getElementsByTagName('p')[1].getAttribute('price-type') === 'number' && sameRow.classList.contains('highlighted')){
             checkIfNumberPriceRow = index;
@@ -267,15 +325,16 @@ function clickMenuItem(e){
     addAndRemoveClasses('', 'highlighted', [...sameRowEle.slice(0, rowIndex), ...sameRowEle.slice(rowIndex + 1)]);
     if(sides){
         if(rowEle.parentNode.querySelectorAll(`.option-row[row-num="${index + 1}"]`).length > 1) return;
-        priceBtn.insertAdjacentHTML('beforebegin', `<p class="sides-title">${sides.title ? sides.title : 'Choose One'}</p>`);
+        priceBtn.insertAdjacentHTML('beforebegin', `<p class="sides-title">Choose One</p>`);
         sides.option.forEach(option => {
             const optionRow = document.createElement('div');
             optionRow.classList.add('option-row');
             optionRow.setAttribute('row-num', `${index + 1}`);
+            optionRow.setAttribute('extra-options', option.options.length >= 1 ? 'true' : 'false');
             priceBtn.insertAdjacentElement('beforebegin', optionRow);
             optionRow.addEventListener('click', clickMenuItem);
             optionRow.insertAdjacentHTML('beforeend', `<p>${option.type}</p>
-            ${option.price ? `<p price-type="${typeof option.price === 'string' ? 'string' : 'number'}">${typeof option.price === 'string' ? '£'+(menuScore.price + Number(option.price.replace('+',''))) : '£'+option.price.toFixed(2)}</p>` : ''}`);
+            ${option.price ? `<p price-type="${typeof option.price === 'string' ? 'string' : 'number'}" extra-options="${option.options ? 'true' : 'false'}">${typeof option.price === 'string' ? '£'+(menuScore.price + Number(option.price.replace('+',''))) : '£'+option.price.toFixed(2)}</p>` : ''}`);
         });
     }else if(!card.querySelector('.counter-container')){
         priceBtn.classList.remove('no-select');
@@ -289,29 +348,179 @@ function clickMenuItem(e){
     }
 };
 
-function cardMinusClick(e){
+export function cardMinusClick(e){
+    if(e.target.classList.contains('no-select')) return;
     let element = e.target;
-    if(element.classList.contains('no-select')) return;
     let numberElement = element.nextSibling.nextSibling;
-    let oldNumber = Number(numberElement.innerHTML);
-    numberElement.innerHTML = oldNumber - 1;
-    if(oldNumber <= 2){
+    let newNumber = Number(numberElement.innerHTML) - 1;
+    numberElement.innerHTML = newNumber;
+    if(newNumber <= 1){
         addAndRemoveClasses('no-select', '', element);
     }
+    let menuScoreIndex = Number(document.getElementById('card').getAttribute('menu-score-index'));
+    const menuScore = menuScores[menuScoreIndex];
+    let extraPrice = 0;
+    let extraOptionsPrice = 0;
+    let isStringType = {is: false, ele: null};
+    document.getElementById('card').querySelectorAll('.option-row').forEach(row => {
+        if(!row.getElementsByTagName('p')[1]) return;
+        if(row.getAttribute('extra-options-row') === 'true'){
+            if(!row.querySelector('.options-counter')) return;
+            let optionsCounter = row.querySelector('.options-counter');
+            extraOptionsPrice += Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', '')) * Number(optionsCounter.innerHTML.replace('£', ''));
+        }
+        if(!row.classList.contains('highlighted')) return;
+        if(row.getElementsByTagName('p')[1].getAttribute('price-type') === 'string'){
+            isStringType.is = true;
+            isStringType.ele = Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
+            return;
+        }
+        extraPrice += Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
+    });
     const priceBtn = e.target.parentNode.nextSibling;
-    let oldPriceBtn = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£', '')) / oldNumber;
-    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPriceBtn * (oldNumber - 1)).toFixed(2);
+    if(isStringType.is){
+        priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(isStringType.ele * newNumber).toFixed(2);
+        return;
+    }
+    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(((menuScore.price + extraPrice) * (newNumber)) + extraOptionsPrice).toFixed(2);
 };
-function cardPlusClick(e){
+export function cardPlusClick(e){
     let numberElement = e.target.previousSibling.previousSibling;
     let minusElement = e.target.parentNode.querySelector('.minus');
-    let oldNumber = Number(numberElement.innerHTML);
-    if(oldNumber < 2) addAndRemoveClasses('', 'no-select', minusElement);
-    numberElement.innerHTML = oldNumber + 1;
+    let newNumber = Number(numberElement.innerHTML) + 1;
+    if(newNumber > 1) addAndRemoveClasses('', 'no-select', minusElement);
+    numberElement.innerHTML = newNumber;
+    let menuScoreIndex = Number(document.getElementById('card').getAttribute('menu-score-index'));
+    const menuScore = menuScores[menuScoreIndex];
+    let extraPrice = 0;
+    let extraOptionsPrice = 0;
+    let isStringType = {is: false, ele: null};
+    document.getElementById('card').querySelectorAll('.option-row').forEach(row => {
+        if(!row.getElementsByTagName('p')[1]) return;
+        if(row.getAttribute('extra-options-row') === 'true'){
+            if(!row.querySelector('.options-counter')) return;
+            let optionsCounter = row.querySelector('.options-counter');
+            extraOptionsPrice += Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', '')) * Number(optionsCounter.innerHTML.replace('£', ''));
+        }
+        if(!row.classList.contains('highlighted')) return;
+        if(row.getElementsByTagName('p')[1].getAttribute('price-type') === 'string'){
+            isStringType.is = true;
+            isStringType.ele = Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
+            return;
+        }
+        extraPrice += Number(row.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
+    });
     const priceBtn = e.target.parentNode.nextSibling;
-    let oldPriceBtn = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£', '')) / oldNumber;
-    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPriceBtn * (oldNumber + 1)).toFixed(2);
+    if(isStringType.is){
+        priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(isStringType.ele * newNumber).toFixed(2);
+        return;
+    }
+    priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(((menuScore.price + extraPrice) * (newNumber)) + extraOptionsPrice).toFixed(2);
 };
+
+export function clickOptionRow(e){
+    if(e.target.classList.contains('row-price')) return;
+    let targetTag = e.target;
+    if(e.target.tagName === 'path' || e.target.tagName === 'g'){
+        while(targetTag.tagName !== 'svg'){
+            targetTag = targetTag.parentNode;
+        }
+    }
+    //Clicked delete icon
+    if(targetTag.tagName === 'svg'){
+        const optionRow = targetTag.parentNode.parentNode;
+        const optionsCounter = optionRow.querySelector('.options-counter');
+        if(optionsCounter.innerHTML === 'Max 10'){
+            optionsCounter.innerHTML = '9';
+        }else if(Number(optionsCounter.innerHTML) < 2){
+            optionsCounter.remove();
+            targetTag.remove();
+        }else{
+            optionsCounter.innerHTML = Number(optionsCounter.innerHTML) - 1;
+        }
+        const price = Number(optionRow.getElementsByTagName('p')[1].innerHTML.replace('£',''));
+        if(price){
+            const priceBtn = document.getElementById('card').childNodes[card.childNodes.length - 1];
+            let oldPrice = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£',''));
+            priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice - price).toFixed(2);
+        }
+        return;
+    }
+    if(e.target.classList.contains('sub-options-price')) return;
+    let optionRow = e.target;
+    if(!e.target.classList.contains('option-row')){
+        optionRow = e.target.parentNode;
+    }
+    if(optionRow.getElementsByTagName('p')[0].getElementsByTagName('span').length < 1){
+        optionRow.getElementsByTagName('p')[0].insertAdjacentHTML('afterbegin', '<span class="options-counter">0</span>');
+        if(optionRow.getElementsByTagName('p')[1]){
+            optionRow.querySelector('.sub-options-price').insertAdjacentHTML('beforeend', trashSVG);
+        }else{
+            optionRow.insertAdjacentHTML('beforeend', trashSVG);
+        }
+    }
+    const optionsCounter = optionRow.querySelector('.options-counter');
+    if(optionsCounter.innerHTML === 'Max 10') return;
+    if((Number(optionsCounter.innerHTML) + 1) > 9){
+        optionsCounter.innerHTML = 'Max 10';
+    }else{
+        optionsCounter.innerHTML = Number(optionsCounter.innerHTML) + 1;
+    }
+    if(optionRow.getElementsByTagName('p')[1]){
+        const card = document.getElementById('card');
+        const priceBtn = card.childNodes[card.childNodes.length - 1];
+        let oldPrice = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£',''));
+        let newPrice = Number(optionRow.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
+        priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice+newPrice).toFixed(2);
+    }
+}
+
+export function clickMenuItemSelect(e){
+    const card = document.getElementById('card');
+    let targetTag = e.target;
+    const priceBtn = card.childNodes[card.childNodes.length - 1];
+    if(e.target.tagName === 'path' || e.target.tagName === 'g'){
+        while(targetTag.tagName !== 'svg'){
+            targetTag = targetTag.parentNode;
+        }
+    }
+    //Clicked delete icon
+    if(targetTag.tagName === 'svg'){
+        priceBtn.classList.add('no-select');
+        const optionRow = targetTag.parentNode;
+        const optionsCounter = optionRow.querySelector('.options-counter');
+        if(Number(optionsCounter.innerHTML) < 2){
+            optionsCounter.remove();
+            targetTag.remove();
+        }else{
+            optionsCounter.innerHTML = Number(optionsCounter.innerHTML) - 1;
+        }
+        return;
+    }
+    let selectNum = menuItem.sides[0].select;
+    let numSelected = 0;
+    card.querySelectorAll('.options-counter').forEach(oc => {
+        numSelected += Number(oc.innerHTML);
+    });
+    if(numSelected >= selectNum){
+        return;
+    }
+    let optionRow = e.target;
+    if(!e.target.classList.contains('option-row')){
+        optionRow = e.target.parentNode;
+    }
+    if(optionRow.getElementsByTagName('p')[0].getElementsByTagName('span').length < 1){
+        optionRow.getElementsByTagName('p')[0].insertAdjacentHTML('afterbegin', '<span class="options-counter">0</span>');
+        optionRow.insertAdjacentHTML('beforeend', trashSVG2);
+    }
+    const optionsCounter = optionRow.querySelector('.options-counter');
+    optionsCounter.innerHTML = Number(optionsCounter.innerHTML) + 1;
+    if(numSelected + 1 >= selectNum){
+        priceBtn.classList.remove('no-select');
+        return;
+    }
+};
+
 
 //URL FRAGMENT
 const loadURLHash = window.location.hash;

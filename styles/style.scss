@@ -24,6 +24,18 @@
     font-family: $caramaran;
 }
 
+.delete-icon{
+    margin-left: 0.5rem;
+    position: relative;
+    top: 5px;
+    &.extra-width{
+        min-width: 50px;
+    }
+    &.extra-top{
+        top: 10px;
+    }
+}
+
 @import 'partials/nav';
 
 @import 'partials/openAbout';
