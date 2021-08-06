@@ -1,5 +1,6 @@
 import {prepareOverlay, unprepareOverlay, cardMinusClick, cardPlusClick, clickMenuItemSelect, clickMenuItem, clickOptionRow} from './app';
 import * as ele from './partials/elements';
+import {escapeHtml} from './partials/utils';
 import {trashSVG3} from './partials/utils.js';
 
 let orderOverlayStore = [];
@@ -14,10 +15,9 @@ export function submitOrder(e){
     let overlayOptionsJoined = null;
     let overlayInformation = {};
     currentOverlay.querySelectorAll('#card .option-row').forEach(opt => {
-        if(opt.getAttribute('extra-options') === 'isExtraOptions') overlayInformation.isExtraOptions = true;
         if(opt.getAttribute('extra-options-row') === 'true' || opt.getAttribute('extra-options') === 'isExtraOptions'){
             if(!opt.querySelector('.options-counter')) return;
-            overlayOptions.push(opt.querySelector('.options-counter').nextSibling.data);
+            overlayOptions.push(escapeHtml(opt.querySelector('.options-counter').nextSibling.data));
             return;
         }
         if(!opt.classList.contains('highlighted')) return;
@@ -25,21 +25,19 @@ export function submitOrder(e){
     });
     overlayOptionsJoined = overlayOptions.join(', ');
     //Find of order already exists
-    if(currentOverlay.getAttribute('reform-state') !== 'updated'){
-        ele.orderContainer.querySelectorAll('.row').forEach(row => {
-            if(menuTitle === row.querySelector('.title-options').getElementsByTagName('p')[0].innerHTML){
-                if(!row.querySelector('.options') || row.getAttribute('isExtraOptions') === 'true'){
-                    orderAlreadyExists = true;
-                    whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
-                    return;
-                }
-                if(overlayOptionsJoined === row.querySelector('.options').innerHTML){
-                    orderAlreadyExists = true;
-                    whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
-                }
+    ele.orderContainer.querySelectorAll('.row').forEach(row => {
+        if(menuTitle === row.querySelector('.title-options').getElementsByTagName('p')[0].innerHTML){
+            if(!row.querySelector('.options') || row.getAttribute('isExtraOptions') === 'true'){
+                orderAlreadyExists = true;
+                whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
+                return;
             }
-        });
-    }
+            if(overlayOptionsJoined === row.querySelector('.options').innerHTML){
+                orderAlreadyExists = true;
+                whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
+            }
+        }
+    });
     let target = e.target;
     if(target.tagName === 'P'){
         target = target.parentNode;
@@ -100,7 +98,6 @@ function renderOutOverlayInformation(){
         const rowEle = document.createElement('div');
         rowEle.classList.add('row');
         rowEle.setAttribute('row-index', index);
-        if(data.isExtraOptions) rowEle.setAttribute('isExtraOptions', 'true');
         rowEle.insertAdjacentHTML('beforeend', `<div class="num-and-name">
         ${data.amount ? `<div class="amount">${data.amount}</div>` : ''}<div class="title-options"><p>${data.title}</p>${data.options ? `<p class="options">${data.options}</p>` : ''}</div></div>
         <div class="price-and-delete"><p class="price">${data.price}</p>${trashSVG3}</div>`);
@@ -154,12 +151,50 @@ function clickRowEle(e){
         row.addEventListener('click', clickMenuItem);
     });
     oldOverlayEle.querySelector('#card .price-btn').addEventListener('click', submitOrder);
+    oldOverlayEle.setAttribute('row-index', rowIndex);
+    oldOverlayEle.querySelector('#card .price-btn').getElementsByTagName('p')[0].innerHTML = 'Ok';
     document.body.style.overflow = 'hidden';
     prepareOverlay();
     document.body.prepend(oldOverlayEle);
 }
 
-function checkIfOverlayInStore(){
-    const overlay = document.getElementById('overlay');
+function regenerateOverlayInformation(overlay, rowIndex){
+    let oldInformation = orderOverlayInformationStore[rowIndex];
+    let newInformation = {};
+    let overlayOptions = [];
+    let overlayOptionsJoined = null;
+    overlay.querySelectorAll('#card .option-row').forEach(opt => {
+        if(opt.getAttribute('extra-options-row') === 'true' || opt.getAttribute('extra-options') === 'isExtraOptions'){
+            if(!opt.querySelector('.options-counter')) return;
+            overlayOptions.push(opt.querySelector('.options-counter').nextSibling.data);
+            return;
+        }
+        if(!opt.classList.contains('highlighted')) return;
+        overlayOptions.push(opt.getElementsByTagName('p')[0].innerHTML);
+    });
+    overlayOptionsJoined = overlayOptions.join(', ');
+    newInformation.options = overlayOptionsJoined;
+    let amountNum = overlay.querySelector('#card .counter-container .minus');
+    if(amountNum) amountNum = Number(amountNum.nextElementSibling.innerHTML);
+    newInformation.amount = amountNum ? amountNum : null;
+    let matchOrNot = true;
+    for(const key in newInformation){
+        if(oldInformation[key] !== newInformation[key]){
+            matchOrNot = false;
+        }
+    }
+    return matchOrNot;
+}
 
+export function checkIfOverlayInStore(){
+    const overlay = document.getElementById('overlay');
+    let rowIndex = overlay.getAttribute('row-index');
+    if(!rowIndex) return;
+    rowIndex = Number(rowIndex);
+    const priceBtnText = overlay.querySelector('.price-btn').getElementsByTagName('p')[0];
+    if(!regenerateOverlayInformation(overlay, rowIndex)){
+        priceBtnText.innerHTML = 'Add to order';
+    }else{
+        priceBtnText.innerHTML = 'Ok';
+    }
 }

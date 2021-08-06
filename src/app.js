@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as map from './partials/map';
 import * as ele from './partials/elements';
 import * as navBar from './partials/navBar';
-import {submitOrder} from './submitOrder';
+import {submitOrder, checkIfOverlayInStore} from './submitOrder';
 
 export let overlayMeshMenuItem = {menuItem: null, overlay: false};
 export let beforeOverlayMeshMenuItem = null;
@@ -219,7 +219,10 @@ function menuFunc(){
                         optionRow.classList.add('option-row');
                         optionRow.setAttribute('row-num', '0');
                         optionRow.setAttribute('extra-options', option.options.length >= 1 ? 'true' : 'false');
-                        if(sides.select) optionRow.setAttribute('extra-options', 'isExtraOptions');
+                        if(sides.select){
+                            optionRow.setAttribute('extra-options', 'isExtraOptions');
+                            card.setAttribute('menu-item-sides-zero', menuItem.sides[0].select);
+                        } 
                         card.append(optionRow);
                         if(sides.select){
                             optionRow.addEventListener('click', clickMenuItemSelect);
@@ -323,6 +326,7 @@ export function clickMenuItem(e){
     }
     addAndRemoveClasses('highlighted', '', rowEle);
     addAndRemoveClasses('', 'highlighted', [...sameRowEle.slice(0, rowIndex), ...sameRowEle.slice(rowIndex + 1)]);
+    checkIfOverlayInStore();
     if(sides){
         if(rowEle.parentNode.querySelectorAll(`.option-row[row-num="${index + 1}"]`).length > 1) return;
         priceBtn.insertAdjacentHTML('beforebegin', `<p class="sides-title">Choose One</p>`);
@@ -380,9 +384,11 @@ export function cardMinusClick(e){
     const priceBtn = e.target.parentNode.nextSibling;
     if(isStringType.is){
         priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(isStringType.ele * newNumber).toFixed(2);
+        checkIfOverlayInStore();
         return;
     }
     priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(((menuScore.price + extraPrice) * (newNumber)) + extraOptionsPrice).toFixed(2);
+    checkIfOverlayInStore();
 };
 export function cardPlusClick(e){
     let numberElement = e.target.previousSibling.previousSibling;
@@ -413,9 +419,11 @@ export function cardPlusClick(e){
     const priceBtn = e.target.parentNode.nextSibling;
     if(isStringType.is){
         priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(isStringType.ele * newNumber).toFixed(2);
+        checkIfOverlayInStore();
         return;
     }
     priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(((menuScore.price + extraPrice) * (newNumber)) + extraOptionsPrice).toFixed(2);
+    checkIfOverlayInStore();
 };
 
 export function clickOptionRow(e){
@@ -444,6 +452,7 @@ export function clickOptionRow(e){
             let oldPrice = Number(priceBtn.getElementsByTagName('p')[1].innerHTML.replace('£',''));
             priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice - price).toFixed(2);
         }
+        checkIfOverlayInStore();
         return;
     }
     if(e.target.classList.contains('sub-options-price')) return;
@@ -473,6 +482,7 @@ export function clickOptionRow(e){
         let newPrice = Number(optionRow.getElementsByTagName('p')[1].innerHTML.replace('£', ''));
         priceBtn.getElementsByTagName('p')[1].innerHTML = '£'+(oldPrice+newPrice).toFixed(2);
     }
+    checkIfOverlayInStore();
 }
 
 export function clickMenuItemSelect(e){
@@ -495,9 +505,10 @@ export function clickMenuItemSelect(e){
         }else{
             optionsCounter.innerHTML = Number(optionsCounter.innerHTML) - 1;
         }
+        checkIfOverlayInStore();
         return;
     }
-    let selectNum = menuItem.sides[0].select;
+    let selectNum = Number(card.getAttribute('menu-item-sides-zero'));
     let numSelected = 0;
     card.querySelectorAll('.options-counter').forEach(oc => {
         numSelected += Number(oc.innerHTML);
@@ -515,6 +526,7 @@ export function clickMenuItemSelect(e){
     }
     const optionsCounter = optionRow.querySelector('.options-counter');
     optionsCounter.innerHTML = Number(optionsCounter.innerHTML) + 1;
+    checkIfOverlayInStore();
     if(numSelected + 1 >= selectNum){
         priceBtn.classList.remove('no-select');
         return;
