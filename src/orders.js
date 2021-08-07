@@ -1,8 +1,29 @@
 import '../styles/orders.scss';
 import axios from 'axios';
 
+const passwordInput = document.getElementById('password-input');
+const passwordBtn = document.getElementById('password-btn');
+
+let isLoggedIn = localStorage.getItem('loggedIn');
+
+if(isLoggedIn === 'true'){
+    renderEverything();
+}else{
+    document.body.classList.remove('hidden');
+}
+
+passwordBtn.onclick = () => {
+    if(passwordInput.value !== '123'){
+        passwordInput.insertAdjacentHTML('beforebegin', `<div class="error-msg">Sorry. Wrong password.</div>`);
+        return;
+    }
+    localStorage.setItem('loggedIn', true);
+    renderEverything();
+};
+
 function renderEverything(){
     axios.get('/fetch-orders').then(res => {
+        document.body.classList.remove('hidden');
         document.body.innerHTML = '';
         const data = res.data.data;
         data.forEach(item => {
@@ -25,18 +46,21 @@ function renderEverything(){
             ${options}
         </div>`)
         });
-
+        document.body.insertAdjacentHTML('beforeend', `<div class="logout-btn" id="logout-btn">Logout</div>`);
         const deleteIcons = document.querySelectorAll('.delete-icon');
         deleteIcons.forEach(icon => {
             icon.addEventListener('click', deleteOrder);
         });
+        const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn.onclick = () => {
+            localStorage.setItem('loggedIn', false);
+            location.reload(); 
+        }
         setTimeout(searchForNewOrders, 60000);
     }).catch(err => {
         console.log(err);
     });
 }
-
-renderEverything();
 
 
 function deleteOrder(e){
