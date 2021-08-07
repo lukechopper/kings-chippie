@@ -2,6 +2,7 @@ import {prepareOverlay, unprepareOverlay, cardMinusClick, cardPlusClick, clickMe
 import * as ele from './partials/elements';
 import {escapeHtml} from './partials/utils';
 import {trashSVG3} from './partials/utils.js';
+import axios from 'axios';
 
 let orderOverlayStore = [];
 let orderOverlayInformationStore = [];
@@ -17,7 +18,10 @@ export function submitOrder(e){
     currentOverlay.querySelectorAll('#card .option-row').forEach(opt => {
         if(opt.getAttribute('extra-options-row') === 'true' || opt.getAttribute('extra-options') === 'isExtraOptions'){
             if(!opt.querySelector('.options-counter')) return;
-            overlayOptions.push(escapeHtml(opt.querySelector('.options-counter').nextSibling.data));
+            let counterNum = opt.querySelector('.options-counter').innerHTML;
+            if(counterNum === 'Max 10') counterNum = '<span remove-this="true">10</span>';
+            else counterNum = '<span remove-this="true">'+counterNum+'</span>';
+            overlayOptions.push(counterNum + ' ' + escapeHtml(opt.querySelector('.options-counter').nextSibling.data));
             return;
         }
         if(!opt.classList.contains('highlighted')) return;
@@ -32,7 +36,7 @@ export function submitOrder(e){
                 whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
                 return;
             }
-            if(overlayOptionsJoined === row.querySelector('.options').innerHTML){
+            if(overlayOptionsJoined.replace(/<span remove-this="true">\d+<\/span>/g, '') === row.querySelector('.options').innerHTML.replace(/<span remove-this="true">\d+<\/span>/g, '')){
                 orderAlreadyExists = true;
                 whereOrderAlreadyExists = Number(row.getAttribute('row-index'));
             }
@@ -166,7 +170,9 @@ function regenerateOverlayInformation(overlay, rowIndex){
     overlay.querySelectorAll('#card .option-row').forEach(opt => {
         if(opt.getAttribute('extra-options-row') === 'true' || opt.getAttribute('extra-options') === 'isExtraOptions'){
             if(!opt.querySelector('.options-counter')) return;
-            overlayOptions.push(opt.querySelector('.options-counter').nextSibling.data);
+            let counterNum = opt.querySelector('.options-counter').innerHTML;
+            if(counterNum === 'Max 10') counterNum = '10';
+            overlayOptions.push(counterNum + ' ' + escapeHtml(opt.querySelector('.options-counter').nextSibling.data));
             return;
         }
         if(!opt.classList.contains('highlighted')) return;
@@ -197,4 +203,81 @@ export function checkIfOverlayInStore(){
     }else{
         priceBtnText.innerHTML = 'Ok';
     }
-}
+};
+
+const stripe = Stripe('pk_test_51JIxRpG3l6QD3bv6m4RrOIKcF24zLC0YzirUmVitFvGCN7NxQcBycUfgBM74tgKwgRJPnAeuol5RISrQ5pJ974mR0047ALGT9t');
+const elements = stripe.elements();
+
+let loadingPayment = false;
+
+ele.orderBtn.onclick = () => {
+    if(loadingPayment) return;
+    let totalPrice = 0;
+    orderOverlayInformationStore.forEach(item => {
+        totalPrice += Number(item.price.replace('£', ''));
+    });
+    const overlay = document.createElement('div');
+    overlay.id = 'overlay';
+    overlay.classList.add('overlay');
+    prepareOverlay();
+    overlay.innerHTML = `<form action="/charge" method="POST" class="payment">
+    <div class="form-total">Total: £${totalPrice.toFixed(2)}</div>
+    <div id="card-error"></div>
+    <input type="hidden" name="price" value="${totalPrice}" />
+    <input type="text" name="name" required placeholder="Fullname" />
+    <input type="email" name="email" required placeholder="Email" />
+    <div id="card-element"></div>
+    <button type="submit" class="submit-payment-btn">Submit Payment</button>
+    </form>`;
+    document.body.prepend(overlay);
+    document.body.style.overflow = 'hidden';
+    const cardStyle = {
+        style:{
+            base: {
+                fontSize: '1.25rem'
+            }
+        }
+    }
+    const card = elements.create('card', cardStyle);
+    const paymentForm = overlay.querySelector('.payment');
+    const errorEl = paymentForm.querySelector('#card-error');
+    const submitBtn = paymentForm.querySelector('.submit-payment-btn');
+    card.mount('#card-element');
+    let formData = {info: orderOverlayInformationStore, stripeToken: null, name: null, email: null, price: null};
+    //Add token to form so that it gets sent along on POST request
+    const stripeTokenHandler = token => {
+        formData.stripeToken = token.id;
+
+        axios.post('/charge', formData).then(function (response) {
+            window.location.href = "/charge";
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+    paymentForm.addEventListener('submit', e => {
+        loadingPayment = true;
+        submitBtn.insertAdjacentHTML('beforebegin', '<div class="loader-small"></div>');
+        submitBtn.remove();
+        e.preventDefault();
+
+        stripe.createToken(card).then(res => {
+            if(res.error){
+                errorEl.classList.add('card-error');
+                errorEl.textContent = res.error.message;
+                return;
+            }
+            formData.name = e.target.querySelector('input[name="name"]').value;
+            formData.email = e.target.querySelector('input[name="email"]').value;
+            formData.price = e.target.querySelector('input[name="price"]').value;
+            stripeTokenHandler(res.token);
+        });
+    });
+    overlay.onclick = (e) => {
+        if(e.target.id !== 'overlay') return;
+        e.target.remove();
+        document.body.style.overflow = '';
+        unprepareOverlay();
+        card.destroy();
+    }
+};

@@ -1,4 +1,4 @@
-import '../styles/style.scss';
+import '../../styles/index/style.scss';
 import {addAndRemoveClasses, trashSVG, trashSVG2} from './partials/utils.js';
 import {gsap} from 'gsap';
 import axios from 'axios';

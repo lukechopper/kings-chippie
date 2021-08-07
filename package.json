@@ -16,10 +16,11 @@
     "axios": "^0.21.1",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
+    "express-session": "^1.17.2",
     "gsap": "^3.7.1",
     "mapbox-gl": "^2.3.1",
     "mongoose": "^5.13.4",
-    "stripe": "^8.167.0"
+    "stripe": "^8.168.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",

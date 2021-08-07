@@ -15,3 +15,4 @@ export const locationSection = document.getElementById('location');
 export const contactSection = document.getElementById('contact');
 //ORDER CONTAINER
 export const orderContainer = document.getElementById('order-container');
+export const orderBtn = document.getElementById('order');

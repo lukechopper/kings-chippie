@@ -21,14 +21,7 @@
         }
     }
 }
-.loader{
-  border: 10px solid #f3f3f3;
-  border-top: 10px solid map-get($colors, "black");
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  animation: spin 2s linear infinite;
-}
+
 .marker {
     background-image: url('https://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png');
     background-size: cover;

@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Catamaran:wght@400;800&display=swap');
+
+@import 'config';
+
+.order{
+    margin: 1rem;
+    font-size: 1.5rem;
+    .order-id{
+        font-weight: 800;
+        font-size: 2rem;
+    }
+    .options{
+        color: #4d4d4d;
+        font-size: 1.25rem;
+    }
+}
+
+.flex-row{
+    display: flex;
+    & > *{
+        margin-right: 1rem;
+    }
+    &.center-row{
+        align-items: center;
+    }
+}
+.flex-col{
+    display: flex;
+    flex-direction: column;
+}
+
+.bold{
+    font-weight: 800;
+}
+
+.delete-icon{
+    transform: scale(1.3);
+    cursor: pointer;
+}
+

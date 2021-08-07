@@ -1,10 +1,10 @@
-/*!******************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./styles/style.scss ***!
-  \******************************************************************************************************************************************************/
+/*!************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./styles/index/style.scss ***!
+  \************************************************************************************************************************************************************/
 @import url(https://fonts.googleapis.com/css2?family=Bungee&family=Catamaran:wght@400;800&display=swap);
-/*!**********************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./styles/style.scss (1) ***!
-  \**********************************************************************************************************************************************************/
+/*!****************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./styles/index/style.scss (1) ***!
+  \****************************************************************************************************************************************************************/
 @-webkit-keyframes openArrow {
   0% {
     bottom: 0px; }
@@ -71,18 +71,37 @@ a, a:link, a:visited, a:hover, a:active {
   margin: 0 auto;
   padding: 0 20px; }
 
-.section-header {
-  font-size: 5rem;
-  text-align: center;
-  text-transform: uppercase;
-  font-family: "Bungee", sans-serif; }
-
 * {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: "Catamaran", sans-serif; }
+
+.loader {
+  border: 10px solid #f3f3f3;
+  border-top: 10px solid #070404;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite; }
+
+.loader-small {
+  border: 8px solid #f3f3f3;
+  border-top: 10px solid #070404;
+  border-radius: 50%;
+  margin-top: 2rem;
+  width: 80px;
+  height: 80px;
+  -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite; }
+
+.section-header {
+  font-size: 5rem;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: "Bungee", sans-serif; }
 
 .delete-icon {
   margin-left: 0.5rem;
@@ -553,15 +572,6 @@ a, a:link, a:visited, a:hover, a:active {
     .location .map-container {
       height: 600px; } }
 
-.loader {
-  border: 10px solid #f3f3f3;
-  border-top: 10px solid #070404;
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  -webkit-animation: spin 2s linear infinite;
-          animation: spin 2s linear infinite; }
-
 .marker {
   background-image: url("https://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png");
   background-size: cover;
@@ -769,4 +779,93 @@ a, a:link, a:visited, a:hover, a:active {
       .overlay .card .price-btn.no-select {
         background-color: lightgray;
         cursor: default; }
+  .overlay .payment {
+    background-color: white;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto 10px;
+    width: 100%;
+    border: 5px solid black; }
+    .overlay .payment .form-total {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-top: -1.5rem;
+      margin-bottom: 1rem; }
+    .overlay .payment input {
+      display: block;
+      width: 100%;
+      padding: 5px 10px;
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      outline: none; }
+    .overlay .payment input[type="email"] {
+      margin-top: -0.7rem; }
+    .overlay .payment .submit-payment-btn {
+      color: white;
+      outline: none;
+      border: none;
+      display: block;
+      background-color: black;
+      font-weight: 800;
+      padding: 10px 20px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      margin-top: 2rem;
+      -webkit-transition: color 0.3s linear;
+      transition: color 0.3s linear; }
+      .overlay .payment .submit-payment-btn:hover {
+        color: #f5bb3d; }
+    .overlay .payment .card-error {
+      margin-bottom: 2rem;
+      background-color: #bf151a;
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: capitalize;
+      padding: 10px 20px; }
+
+#card-element {
+  height: 30px; }
+
+.payment-successful {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-size: 5rem;
+  text-align: center;
+  font-weight: 800;
+  min-height: 800px; }
+  .payment-successful p.title {
+    color: #bf151a; }
+  .payment-successful p.desc {
+    font-size: 3rem;
+    font-weight: 400;
+    margin-bottom: 2rem; }
+  .payment-successful .back-to-main-btn {
+    background-color: black;
+    color: white;
+    padding: 10px 20px;
+    font-size: 3rem;
+    -webkit-transition: color 0.3s linear;
+    transition: color 0.3s linear; }
+    .payment-successful .back-to-main-btn:hover {
+      color: #f5bb3d; }
 
