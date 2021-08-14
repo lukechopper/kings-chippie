@@ -38,6 +38,10 @@
     cursor: pointer;
 }
 
+h1{
+    margin: 1rem 1rem 0 1rem;
+}
+
 
 section.password{
     height: 100vh;
@@ -55,19 +59,23 @@ section.password{
         font-size: 1.25rem;
         margin-bottom: 1rem;
         margin-top: -1rem;
+        text-align: center;
     }
     input[name="password"]{
         padding: 10px 20px;
         font-size: 1.25rem;
+        display: block;
     }
     .password-btn{
-        margin-top: 1rem;
         color: white;
         background-color: black;
+        display: block;
+        margin: 1rem auto 0 auto;
         padding: 10px 20px;
         font-size: 3rem;
         cursor: pointer;
         font-size: 2rem;
+        border: none;
         font-weight: 800;
         transition: color 0.3s linear;
         &:hover{

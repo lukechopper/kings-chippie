@@ -2,7 +2,7 @@ import '../styles/orders.scss';
 import axios from 'axios';
 
 const passwordInput = document.getElementById('password-input');
-const passwordBtn = document.getElementById('password-btn');
+const passwordForm = document.getElementById('password-form');
 
 let isLoggedIn = localStorage.getItem('loggedIn');
 
@@ -12,8 +12,11 @@ if(isLoggedIn === 'true'){
     document.body.classList.remove('hidden');
 }
 
-passwordBtn.onclick = () => {
+passwordForm.onsubmit = (e) => {
+    e.preventDefault();
     if(passwordInput.value !== '123'){
+        passwordInput.value = '';
+        if(document.querySelector('.error-msg')) return;
         passwordInput.insertAdjacentHTML('beforebegin', `<div class="error-msg">Sorry. Wrong password.</div>`);
         return;
     }
@@ -26,6 +29,9 @@ function renderEverything(){
         document.body.classList.remove('hidden');
         document.body.innerHTML = '';
         const data = res.data.data;
+        if(data.length < 1){
+            document.body.insertAdjacentHTML('beforeend', '<h1>No orders yet.</h1>');
+        }
         data.forEach(item => {
             let options = '';
             item.orders.forEach(order => {

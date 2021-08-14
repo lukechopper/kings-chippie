@@ -10,7 +10,7 @@ const {reverseEscapeHtml} = require('./utils');
 const Menu = require('./data/schemas/menu');
 const Order = require('./data/schemas/orders');
 
-mongoose.connect('mongodb://localhost/chippySolihull', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb+srv://redsquare:'+process.env.CLUSTER0_PASSWORD+'@cluster0.od3kc.mongodb.net/chippySolihull?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', error => console.log(error));
 db.once('open', async () => {

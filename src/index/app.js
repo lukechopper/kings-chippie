@@ -37,7 +37,7 @@ addMenuItemEventListener();
 
 let scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-addEventListener('scroll', () => {
+function scrollEventHandler(){
     scroll = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
     navBar.sortNavHeight(scroll);
     //OPEN section
@@ -71,7 +71,11 @@ addEventListener('scroll', () => {
         addAndRemoveClasses('selected', '', ele.navLinks[3]);
         addAndRemoveClasses('', 'selected', [...ele.navLinks.slice(0, 3)]);
     }
-});
+}
+
+scrollEventHandler();
+
+addEventListener('scroll', scrollEventHandler);
 
 let menuCols = document.querySelectorAll('.menu-col');
 let menuCol1Content = menuCols[0].innerHTML;

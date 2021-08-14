@@ -41,8 +41,8 @@
     -webkit-transform: scale(1);
             transform: scale(1); }
   50% {
-    -webkit-transform: scale(1.2);
-            transform: scale(1.2); }
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1); }
   100% {
     -webkit-transform: scale(1);
             transform: scale(1); } }
@@ -52,8 +52,8 @@
     -webkit-transform: scale(1);
             transform: scale(1); }
   50% {
-    -webkit-transform: scale(1.2);
-            transform: scale(1.2); }
+    -webkit-transform: scale(1.1);
+            transform: scale(1.1); }
   100% {
     -webkit-transform: scale(1);
             transform: scale(1); } }
@@ -785,7 +785,15 @@ a, a:link, a:visited, a:hover, a:active {
     max-width: 1200px;
     margin: auto 10px;
     width: 100%;
-    border: 5px solid black; }
+    border: 5px solid black;
+    position: relative; }
+    .overlay .payment .cross {
+      position: absolute;
+      top: -25px;
+      right: 10px;
+      font-size: 4rem;
+      cursor: pointer;
+      color: #bf151a; }
     .overlay .payment .form-total {
       text-align: center;
       font-size: 2.5rem;
@@ -800,7 +808,7 @@ a, a:link, a:visited, a:hover, a:active {
       margin-bottom: 0.5rem;
       border: none;
       outline: none; }
-    .overlay .payment input[type="email"] {
+    .overlay .payment input[name="email"] {
       margin-top: -0.7rem; }
     .overlay .payment .submit-payment-btn {
       color: white;

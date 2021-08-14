@@ -220,12 +220,14 @@ ele.orderBtn.onclick = () => {
     overlay.id = 'overlay';
     overlay.classList.add('overlay');
     prepareOverlay();
-    overlay.innerHTML = `<form action="/charge" method="POST" class="payment">
+    ele.orderBtn.style.color = '#f5bb3d';
+    overlay.innerHTML = `<form action="/charge" method="POST" class="payment" autocomplete="off">
+    <div class="cross">x</div>
     <div class="form-total">Total: £${totalPrice.toFixed(2)}</div>
     <div id="card-error"></div>
     <input type="hidden" name="price" value="${totalPrice}" />
-    <input type="text" name="name" required placeholder="Fullname" />
-    <input type="email" name="email" required placeholder="Email" />
+    <input type="text" name="name" placeholder="Fullname" />
+    <input type="text" name="email" placeholder="Email" />
     <div id="card-element"></div>
     <button type="submit" class="submit-payment-btn">Submit Payment</button>
     </form>`;
@@ -249,34 +251,67 @@ ele.orderBtn.onclick = () => {
         formData.stripeToken = token.id;
 
         axios.post('/charge', formData).then(function (response) {
+            loadingPayment = false;
             window.location.href = "/charge";
           })
           .catch(function (error) {
-            console.log(error);
+            errorEl.textContent = 'Sorry. There was an error with your payment.';
+            loadingPayment = false;
           });
     }
     paymentForm.addEventListener('submit', e => {
         loadingPayment = true;
-        submitBtn.insertAdjacentHTML('beforebegin', '<div class="loader-small"></div>');
-        submitBtn.remove();
         e.preventDefault();
+        //Error checking
+        const inputName = e.target.querySelector('input[name="name"]').value;
+        const inputEmail = e.target.querySelector('input[name="email"]').value;
+
+        if(!inputName){
+            errorEl.classList.add('card-error');
+            errorEl.textContent = 'You need to enter your name.';
+            return;
+        }
+        if(!inputEmail){
+            errorEl.classList.add('card-error');
+            errorEl.textContent = 'You need to enter your email.';
+            return;
+        }
+        const inputEmailMatch = inputEmail.match(/[\.@]/g) ? inputEmail.match(/[\.@]/g).length > 1 : null;
+        if(!inputEmailMatch){
+            errorEl.classList.add('card-error');
+            errorEl.textContent = 'You need to enter a proper email.';
+            return;
+        }
 
         stripe.createToken(card).then(res => {
             if(res.error){
                 errorEl.classList.add('card-error');
                 errorEl.textContent = res.error.message;
+                loadingPayment = false;
                 return;
             }
-            formData.name = e.target.querySelector('input[name="name"]').value;
-            formData.email = e.target.querySelector('input[name="email"]').value;
+            formData.name = inputName;
+            formData.email = inputEmail;
             formData.price = e.target.querySelector('input[name="price"]').value;
+            submitBtn.insertAdjacentHTML('beforebegin', '<div class="loader-small"></div>');
+            submitBtn.remove();
             stripeTokenHandler(res.token);
         });
     });
     overlay.onclick = (e) => {
+        if(loadingPayment) return;
         if(e.target.id !== 'overlay') return;
         e.target.remove();
         document.body.style.overflow = '';
+        ele.orderBtn.style.color = '';
+        unprepareOverlay();
+        card.destroy();
+    };
+    overlay.querySelector('.cross').onclick = e => {
+        if(loadingPayment) return;
+        overlay.remove();
+        document.body.style.overflow = '';
+        ele.orderBtn.style.color = '';
         unprepareOverlay();
         card.destroy();
     }
