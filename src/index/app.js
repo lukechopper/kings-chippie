@@ -160,6 +160,14 @@ export function unprepareOverlay(){
 
 let menuScores = [];
 let menuItem = null; //Call after GET request
+let overlayAlreadyOpen = false;
+
+export function setOverlayAlreadyOpen(val){
+    overlayAlreadyOpen = val;
+}
+export function getOverlayAlreadyOpen(){
+    return overlayAlreadyOpen;
+}
 
 function menuFunc(){
 
@@ -180,20 +188,26 @@ function menuFunc(){
 
     addBtns.forEach((item, index) => {
         item.onclick = () => {
-
+            if(overlayAlreadyOpen) return;
             const menuScore = menuScores[index];
+            const overlay = document.createElement('div');
+            overlay.id = 'overlay';
+            overlay.classList.add('overlay');
+            document.body.prepend(overlay);
+            overlayAlreadyOpen = true;
+            document.body.style.overflow = 'hidden';
+            overlay.onclick = (e) => {
+                if(e.target.id !== 'overlay') return;
+                e.target.remove();
+                overlayAlreadyOpen = false;
+                document.body.style.overflow = '';
+                unprepareOverlay();
+            }
+            overlay.innerHTML = '<div class="loader"></div>';
             axios.get('/menu/'+menuScore.parentId+'/'+menuScore.childId).then(res => {
+                overlay.innerHTML = '';
                 prepareOverlay();
                 menuItem = res.data.data;
-                const overlay = document.createElement('div');
-                overlay.id = 'overlay';
-                overlay.classList.add('overlay');
-                overlay.onclick = (e) => {
-                    if(e.target.id !== 'overlay') return;
-                    e.target.remove();
-                    document.body.style.overflow = '';
-                    unprepareOverlay();
-                }
                 const card = document.createElement('div');
                 card.setAttribute('menu-score-index', index);
                 card.id = 'card';
@@ -205,6 +219,7 @@ function menuFunc(){
                 cross.onclick = (e) => {
                     overlay.remove();
                     document.body.style.overflow = '';
+                    overlayAlreadyOpen = false;
                     setTimeout(() => {
                         overlayMeshMenuItem.overlay = false;
                         if(beforeOverlayMeshMenuItem !== overlayMeshMenuItem.menuItem){
@@ -253,8 +268,6 @@ function menuFunc(){
                 card.append(priceBtn);
 
                 overlay.prepend(card);
-                document.body.prepend(overlay);
-                document.body.style.overflow = 'hidden';
             });
         }
     });

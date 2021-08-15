@@ -1,4 +1,4 @@
-import {prepareOverlay, unprepareOverlay, cardMinusClick, cardPlusClick, clickMenuItemSelect, clickMenuItem, clickOptionRow} from './app';
+import {prepareOverlay, unprepareOverlay, cardMinusClick, cardPlusClick, clickMenuItemSelect, clickMenuItem, clickOptionRow, setOverlayAlreadyOpen} from './app';
 import * as ele from './partials/elements';
 import {escapeHtml} from './partials/utils';
 import {trashSVG3} from './partials/utils.js';
@@ -54,6 +54,7 @@ export function submitOrder(e){
     }
     currentOverlay.remove();
     document.body.style.overflow = '';
+    setOverlayAlreadyOpen(false);
     unprepareOverlay();
     overlayInformation.title = menuTitle;
     overlayInformation.options = overlayOptionsJoined;

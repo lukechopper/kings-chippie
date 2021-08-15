@@ -797,8 +797,8 @@ a, a:link, a:visited, a:hover, a:active {
     position: relative; }
     .overlay .payment .cross {
       position: absolute;
-      top: -25px;
-      right: 10px;
+      top: -33px;
+      right: 5px;
       font-size: 4rem;
       cursor: pointer;
       color: #bf151a; }
