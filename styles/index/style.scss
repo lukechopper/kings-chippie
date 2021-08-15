@@ -9,8 +9,15 @@
     text-align:center;
     text-transform: uppercase;
     font-family: $bungee;
+    line-height: 10rem;
 }
 
+@media(max-width: $medium){
+    .section-header{
+        font-size: 4rem;
+        line-height: 8rem;
+    }
+}
 
 .delete-icon{
     margin-left: 0.5rem;

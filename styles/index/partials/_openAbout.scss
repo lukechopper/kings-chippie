@@ -45,12 +45,9 @@
         position: absolute;
         left: 50%;
         bottom: 0;
-        font-size: 5rem;
-        margin: auto;
         color: white;
         z-index: 3;
-        transform: translateX(-50%);
-        text-shadow: 0 0 15px rgba(0,0,0,.3);
+        transform: translate(-50%, -50px) scale(6);
         cursor: pointer;
         animation: openArrow 2s infinite;
     }
@@ -69,7 +66,7 @@
             padding-bottom: 50px;
         }
         .open-arrow{
-            font-size: 3rem;
+            transform: translate(-50%, -30px) scale(3);
         }
         height: 500px;
     }
@@ -101,6 +98,7 @@
         font-family: $bungee;
         font-size: 3.5rem;
         line-height: 3.5rem;
+        padding: 0 20px;
     }
 }
 .about-img{
