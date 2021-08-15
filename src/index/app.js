@@ -196,6 +196,7 @@ function menuFunc(){
             document.body.prepend(overlay);
             overlayAlreadyOpen = true;
             document.body.style.overflow = 'hidden';
+            prepareOverlay();
             overlay.onclick = (e) => {
                 if(e.target.id !== 'overlay') return;
                 e.target.remove();
@@ -206,7 +207,6 @@ function menuFunc(){
             overlay.innerHTML = '<div class="loader"></div>';
             axios.get('/menu/'+menuScore.parentId+'/'+menuScore.childId).then(res => {
                 overlay.innerHTML = '';
-                prepareOverlay();
                 menuItem = res.data.data;
                 const card = document.createElement('div');
                 card.setAttribute('menu-score-index', index);
