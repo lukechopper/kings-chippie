@@ -362,6 +362,7 @@ a, a:link, a:visited, a:hover, a:active {
 .menu {
   padding: 5rem 0 0 0; }
   .menu .menu-container {
+    margin-top: 1rem;
     width: 100%;
     display: -webkit-box;
     display: -webkit-flex;
@@ -552,6 +553,7 @@ a, a:link, a:visited, a:hover, a:active {
 .location {
   padding-top: 5rem; }
   .location .map-container {
+    margin-top: 1.5rem;
     width: 100%;
     height: 700px;
     position: relative;
@@ -597,7 +599,8 @@ a, a:link, a:visited, a:hover, a:active {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
-    display: flex; }
+    display: flex;
+    margin-top: 1.5rem; }
   .contact .contact-col {
     width: 50%;
     text-align: center; }
